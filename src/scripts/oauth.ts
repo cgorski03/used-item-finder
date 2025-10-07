@@ -3,7 +3,7 @@ import { Buffer } from 'buffer';
 
 const EBAY_PRODUCTION_URL = 'https://api.sandbox.ebay.com/identity/v1/oauth2/token';
 const EBAY_SANDBOX_URL = 'https://api.sandbox.ebay.com/identity/v1/oauth2/token';
-const CLIENT_CRED_SCOPE = 'https://api.ebay.com/oauth/api_scope';
+const CLIENT_CRED_SCOPE = 'https://api.ebay.com/oauth/api_scope https://api.ebay.com/oauth/api_scope/buy.item.bulk';
 
 interface EbayAuthToken {
   clientId: string;
@@ -90,6 +90,8 @@ const getEbayToken = async (
   }
 };
 
+// TODO: future refactor will include making this a class that manages durations
+// Time should not be an issue currently. Tokens are valid for two hours
 export async function getOAuthToken() {
   // Check Environment Variables
   const { clientId, clientSecret, environment } = getEnvironmentVariables();
@@ -100,5 +102,5 @@ export async function getOAuthToken() {
     clientSecret,
     baseUrl
   })
-  console.log(accessToken);
+  return accessToken;
 }
