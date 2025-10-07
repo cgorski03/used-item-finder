@@ -105,17 +105,18 @@ async function main() {
   // 1. Hardcode a search for now
   const token = await getOAuthToken();
   const searchKeywords = 'Phone';
-  console.log(token);
   const foundItems = await searchEbay(searchKeywords, token.access_token);
   // 2. Loop through found items and save new ones
-  for (const itemForDb of foundItems) { // foundItems now contains the mapped objects
+  for (const itemForDb of foundItems) {
     // You might want to get the db instance first if `db` is a Promise
     const drizzleDb = await db; // If db is a Promise from initDb()
 
     const existing = await drizzleDb.query.items.findFirst({
       where: eq(items.externalId, itemForDb.externalId),
     });
-
+    if (existing) {
+      console.log(existing);
+    }
     if (!existing) {
       console.log(`New item found: ${itemForDb.title}`);
       await drizzleDb.insert(items).values(itemForDb); // Insert the correctly shaped object
