@@ -1,9 +1,9 @@
 import 'dotenv/config'
 import { Buffer } from 'buffer';
 
-const EBAY_PRODUCTION_URL = 'https://api.sandbox.ebay.com/identity/v1/oauth2/token';
+const EBAY_PRODUCTION_URL = 'https://api.ebay.com/identity/v1/oauth2/token';
 const EBAY_SANDBOX_URL = 'https://api.sandbox.ebay.com/identity/v1/oauth2/token';
-const CLIENT_CRED_SCOPE = 'https://api.ebay.com/oauth/api_scope https://api.ebay.com/oauth/api_scope/buy.item.bulk';
+const CLIENT_CRED_SCOPE = 'https://api.ebay.com/oauth/api_scope';
 
 interface EbayAuthToken {
   clientId: string;
@@ -43,7 +43,8 @@ function encodeCredentials(appId: string, clientSecret: string): string {
 function generateApiEndpoint(env: string) {
   if (env === "PRODUCTION") {
     return EBAY_PRODUCTION_URL;
-  } return EBAY_SANDBOX_URL;
+  }
+  return EBAY_SANDBOX_URL;
 }
 
 /**
