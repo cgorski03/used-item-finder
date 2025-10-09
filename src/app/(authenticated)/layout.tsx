@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { AuthNavbar } from '@/layout/auth-navbar';
+import { AuthHeader } from '@/layout/auth-header';
 
 export default async function AuthenticatedLayout({
   children,
@@ -15,8 +16,9 @@ export default async function AuthenticatedLayout({
     <div className="flex min-h-screen bg-gray-50">
       {/* Left Sidebar / Navbar */}
       <AuthNavbar />
+      <AuthHeader />
       {/* The actual page content will be rendered here */}
-      <main className="flex-1 p-6 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto">
         {children}
       </main>
     </div>
