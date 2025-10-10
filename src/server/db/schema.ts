@@ -1,7 +1,6 @@
-import { pgTable, uuid, varchar, decimal, jsonb, timestamp }
-  from 'drizzle-orm/pg-core';
+import { pgTable, uuid, varchar, decimal, jsonb, timestamp } from 'drizzle-orm/pg-core';
 
-export const items = pgTable('items', {
+export const item = pgTable('item', {
   id: uuid('id').primaryKey().defaultRandom(),
   externalId: varchar('external_id', { length: 100 }).notNull().unique(),
   title: varchar('title', { length: 500 }).notNull(),
