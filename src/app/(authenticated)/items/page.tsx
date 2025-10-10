@@ -5,5 +5,5 @@ import { trpc } from '@/trpc/react'
 export default function ItemsPage() {
 
   const res = trpc.items.getAll.useQuery();
-  return (<div></div>);
+  return (<div className='w-full h-full'></div>);
 }

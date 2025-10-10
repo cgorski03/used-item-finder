@@ -11,16 +11,20 @@ export default async function AuthenticatedLayout({
   if (!userId) {
     redirect('/sign-in');
   }
-
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    < div className="flex flex-1 overflow-hidden" >
       {/* Left Sidebar / Navbar */}
-      <AuthNavbar />
-      <AuthHeader />
-      {/* The actual page content will be rendered here */}
-      <main className="flex-1 overflow-y-auto">
-        {children}
-      </main>
-    </div>
+      < AuthNavbar />
+      <div className="flex flex-col w-full min-h-screen">
+        {/* Top Header */}
+        <AuthHeader />
+
+
+        {/* The actual page content will be rendered here */}
+        <main className="flex-1 overflow-y-auto p-4 bg-background"> {/* Added padding for content */}
+          {children}
+        </main>
+      </div>
+    </div >
   );
 }

@@ -37,10 +37,10 @@ const NavLink = ({ href, icon: Icon, children, isActive, onClick }: NavLinkProps
   <Button
     asChild
     variant="ghost"
-    className={`w-full justify-start text-left h-10 px-4 transition-colors 
+    className={`w-full justify-start text-sidebar-foreground text-left px-4 transition-colors 
       ${isActive
-        ? 'bg-primary text-primary-foreground hover:bg-primary/90'
-        : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+        ? 'bg-primary text-sidebar-primary-foreground hover:bg-primary/90 hover:text-sidebar-primary-foreground'
+        : 'text-muted-foreground hover:bg-sidebar-accent hover:text-accent-foreground'
       }`}
     onClick={onClick}
   >
@@ -56,7 +56,7 @@ export function AuthNavbar() {
   const [isOpen, setIsOpen] = useState(false);
 
   const sidebarContent = (
-    <nav className="flex-1 mt-6">
+    <nav className="bg-sidebar flex-1 mt-6 px-6">
       <ul className="space-y-1">
         {navLinks.map((link) => (
           <li key={link.name}>
@@ -84,18 +84,18 @@ export function AuthNavbar() {
             <span className="sr-only">Toggle navigation</span>
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className="w-64 bg-gray-900 text-white p-4 pt-12">
+        <SheetContent side="left" className="w-64 bg-sidebar text-white p-4 pt-12">
           <div className="text-3xl font-extrabold mb-8 text-indigo-400">{process.env.NEXT_PUBLIC_APP_NAME}</div>
           {sidebarContent}
         </SheetContent>
       </Sheet>
 
       {/* Desktop Sidebar */}
-      <aside className="flex w-64 flex-col border-r border-border bg-card">
+      <aside className="flex w-64 flex-col border-r bg-sidebar border-border ">
         <div className="flex h-16 items-center border-b border-border px-6">
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-              <LayoutGrid className="h-5 w-5 text-primary-foreground" />
+              <LayoutGrid className="h-5 w-5 bg-sidebar" />
             </div>
             <span className="text-lg font-semibold text-foreground">{process.env.NEXT_PUBLIC_APP_NAME}</span>
           </div>
