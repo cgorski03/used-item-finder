@@ -44,7 +44,7 @@ const NavLink = ({ href, icon: Icon, children, isActive, onClick }: NavLinkProps
       }`}
     onClick={onClick}
   >
-    <Link href={href}>
+    <Link href={href} prefetch={true}>
       <Icon className="h-4 w-4 mr-3" />
       <span>{children}</span>
     </Link>
