@@ -30,8 +30,9 @@ export function ItemCard({ item }: ItemCardProps) {
             <Image
               src={item.primaryImageUrl}
               alt={item.title || "Item image"}
-              fill
-              className="object-cover transition-transform duration-300 hover:scale-105"
+              width={200}
+              height={200}
+              className="object-cover mx-auto transition-transform duration-300 hover:scale-105"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               priority // For the first few items, consider loading them faster
             />

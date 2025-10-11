@@ -1,0 +1,25 @@
+{
+  "workers": [
+    {
+      "name": "my-search-worker",
+      "main": "src/process-search-worker.ts",
+      "compatibility_date": "2024-01-01",
+      "compatibility_flags": ["nodejs_compat"],
+     "vars": {
+        "DATABASE_URL": "placeholder_will_be_overwritten_by_secrets",
+        "EBAY_ACCESS_TOKEN": "placeholder_will_be_overwritten_by_secrets",
+        "QSTASH_CURRENT_SIGNING_KEY": "placeholder_will_be_overwritten_by_secrets",
+        "QSTASH_NEXT_SIGNING_KEY": "placeholder_will_be_overwritten_by_secrets"
+      }
+    },
+    {
+      "name": "search-coordinator-worker",
+      "main": "src/search-coordinator-worker",
+      "compatibility_date": "2024-01-01",
+      "compatibility_flags": ["nodejs_compat"],
+      "vars": {
+        "DATABASE_URL": "placeholder_will_be_overwritten_by_secrets",
+      }
+    }
+  ]
+}

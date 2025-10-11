@@ -1,4 +1,4 @@
 import { type RouterOutputs } from "./react";
 
-export type Item = RouterOutputs["items"]["getById"];
-export type ItemList = RouterOutputs["items"]["getAll"];
+export type Item = RouterOutputs["item"]["getById"];
+export type ItemList = RouterOutputs["item"]["getAll"];
