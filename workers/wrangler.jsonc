@@ -1,16 +1,36 @@
 {
+    "queues": {
+    "producers": [],
+    "consumers": [
+      {
+        "queue": "search-processing-queue",
+        "dead_letter_queue": "my-search-processing-dlq",
+        "max_batch_size": 50,
+        "max_batch_timeout": 30,
+        "max_retries": 5,
+        "max_concurrency": 10
+      }
+    ]
+  },
   "workers": [
     {
-      "name": "my-search-worker",
+      "name": "search-worker",
       "main": "src/process-search-worker.ts",
       "compatibility_date": "2024-01-01",
       "compatibility_flags": ["nodejs_compat"],
      "vars": {
-        "DATABASE_URL": "placeholder_will_be_overwritten_by_secrets",
-        "EBAY_ACCESS_TOKEN": "placeholder_will_be_overwritten_by_secrets",
-        "QSTASH_CURRENT_SIGNING_KEY": "placeholder_will_be_overwritten_by_secrets",
-        "QSTASH_NEXT_SIGNING_KEY": "placeholder_will_be_overwritten_by_secrets"
-      }
+        "DATABASE_URL": "placeholder",
+        "EBAY_ACCESS_TOKEN": "placeholder",
+        "QSTASH_CURRENT_SIGNING_KEY": "placeholder",
+        "QSTASH_NEXT_SIGNING_KEY": "placeholder"
+      },
+    "bindings": [
+        {
+          "type": "queue",
+          "name": "search_jobs_queue",
+          "queue_name": "my-search-processing-queue"
+        }
+      ]
     },
     {
       "name": "search-coordinator-worker",
@@ -18,7 +38,17 @@
       "compatibility_date": "2024-01-01",
       "compatibility_flags": ["nodejs_compat"],
       "vars": {
-        "DATABASE_URL": "placeholder_will_be_overwritten_by_secrets",
+        "DATABASE_URL": "placeholder",
+      },
+     "bindings": [
+        {
+          "type": "queue",
+          "name": "search_jobs_queue",
+          "queue_name": "search-processing-queue"
+        }
+      ],
+      "triggers": {
+        "crons": ["*/15 * * * *"]
       }
     }
   ]
