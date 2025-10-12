@@ -17,6 +17,7 @@
 		"@neondatabase/serverless": "^1.0.2",
 		"@upstash/qstash": "^2.8.4",
 		"drizzle-orm": "^0.44.6",
+		"ebay-oauth-nodejs-client": "^1.2.2",
 		"postgres": "^3.4.7",
 		"zod": "^4.1.12"
 	}

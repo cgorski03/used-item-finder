@@ -4,7 +4,9 @@ import { search } from '../shared/db/schema';
 
 type Env = {
     DATABASE_URL: string;
+    EBAY_TOKEN_KEY: string;
     search_jobs_queue: Queue;
+    ITEM_FINDER: KVNamespace;
 }
 
 export default {
