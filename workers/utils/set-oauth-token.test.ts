@@ -1,4 +1,4 @@
-import { shouldGetNewToken, setRefreshToken } from "./set-oauth-token";
+import { shouldGetNewToken, setEbayToken } from "./set-oauth-token";
 
 jest.mock('./ebay-api', () => ({
     ...jest.requireActual('./ebay-api'),
@@ -27,7 +27,7 @@ describe('setRefreshToken', () => {
             put: jest.fn()
         } as unknown as KVNamespace;
 
-        await setRefreshToken(mockKV, 'TOKEN_KEY');
+        await setEbayToken(mockKV, 'TOKEN_KEY');
         expect(mockKV.put,).not.toHaveBeenCalled();
     });
     it('should refresh an invalid token', async () => {
@@ -39,7 +39,7 @@ describe('setRefreshToken', () => {
             put: jest.fn()
         } as unknown as KVNamespace;
 
-        await setRefreshToken(mockKV, 'TOKEN_KEY');
+        await setEbayToken(mockKV, 'TOKEN_KEY');
         expect(mockKV.put).toHaveBeenCalledWith(
             'TOKEN_KEY',
             expect.stringContaining('valid-token')

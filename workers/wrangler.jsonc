@@ -48,8 +48,6 @@
 			],
 			"vars": {
 				"DATABASE_URL": "placeholder",
-                "EBAY_TOKEN_KEY": "EBAY_ACCESS_TOKEN"
-
 			},
 			"bindings": [
 				{

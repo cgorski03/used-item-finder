@@ -9,21 +9,28 @@ type AccessTokenKVObject = {
 
 export const shouldGetNewToken = (accessToken: unknown, expirationBufferMinutes: number = EXPIRATION_BUFFER_MINUTES): boolean => {
     // type guards
-    if (!accessToken || typeof accessToken !== "object") return true;
-    if (!("access_token" in accessToken) || !("expires_at" in accessToken)) return true;
-    const tokenObj = accessToken as AccessTokenKVObject;
-    if (typeof tokenObj.expires_at !== 'number') return true;
+    const token = parseAccessToken(accessToken);
+    if (!token) return true;
     // Check if it is going to expire in the next 15 minutes
     const currentUtcTimestampMs = Date.now();
-    if ((tokenObj.expires_at - (expirationBufferMinutes * 60 * 1000)) < currentUtcTimestampMs) {
+    if ((token.expires_at - (expirationBufferMinutes * 60 * 1000)) < currentUtcTimestampMs) {
         return true;
     }
     return false;
 }
 
-export async function setRefreshToken(item_finder_kv: KVNamespace, EBAY_TOKEN_KEY: string) {
+export function parseAccessToken(accessToken: unknown): AccessTokenKVObject | null {
+    if (!accessToken || typeof accessToken !== "object") return null;
+    if (!("access_token" in accessToken) || !("expires_at" in accessToken)) return null;
+
+    const tokenObj = accessToken as AccessTokenKVObject;
+    if (typeof tokenObj.expires_at !== 'number' || typeof tokenObj.access_token !== 'string') return null;
+    return tokenObj
+}
+
+export async function setEbayToken(item_finder_kv: KVNamespace, EBAY_TOKEN_KEY: string) {
     // Get the current token from the KV 
-    let accessToken = item_finder_kv.get(EBAY_TOKEN_KEY, { type: 'json' });
+    let accessToken = await item_finder_kv.get(EBAY_TOKEN_KEY, { type: 'json' });
     if (!shouldGetNewToken(accessToken)) {
         console.log(`Token within ${EXPIRATION_BUFFER_MINUTES} minutes. Refreshing token is not necessary`);
         return;

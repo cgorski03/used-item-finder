@@ -1,6 +1,7 @@
 import { and, eq, isNull, lte, or } from "drizzle-orm";
 import { db } from "../shared/db/client";
 import { search } from '../shared/db/schema';
+import { setEbayToken } from "../utils/set-oauth-token";
 
 type Env = {
     DATABASE_URL: string;
@@ -27,9 +28,11 @@ export default {
             );
             console.log(`Found ${searches.length}`)
             const messagesToSend = searches.map(search => ({
-                body: { searchId: search.id },
+                body: { search_id: search.id },
             }));
             if (messagesToSend.length > 0) {
+                // Make sure there is a token 
+                await setEbayToken(env.ITEM_FINDER, env.EBAY_TOKEN_KEY);
                 // Queue.sendBatch allows sending multiple messages at once
                 await env.search_jobs_queue.sendBatch(messagesToSend);
                 console.log(`Queued ${messagesToSend.length} search jobs to Cloudflare Queue.`);
