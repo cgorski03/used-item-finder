@@ -1,4 +1,5 @@
-import EbayAuthToken, { AccessTokenResponse } from 'ebay-oauth-nodejs-client';
+import { getAccessToken } from "./ebay-api";
+
 const EXPIRATION_BUFFER_MINUTES = 15;
 
 type AccessTokenKVObject = {
@@ -6,35 +7,19 @@ type AccessTokenKVObject = {
     expiresAt: number; // UTC Timestamp in ms
 }
 
-const getAccessToken = async (): Promise<AccessTokenResponse> => {
-    const env = process.env.EBAY_ENV!;
-    if (env !== 'PRODUCTION' && env !== 'SANDBOX') {
-        console.log('EBAY_ENV is not valid');
-        throw new Error('Environment must be set');
-    }
-    const options = {
-        clientId: process.env.clientId!,
-        clientSecret: process.env.clientSecret!,
-        devid: process.env.devId!
-    }
-
-    const token = new EbayAuthToken(options)
-    return await token.getApplicationToken(env);
-}
-
-const shouldGetNewToken = (accessToken: unknown): boolean => {
-    // type gaurds
+export const shouldGetNewToken = (accessToken: unknown, expirationBufferMinutes: number = EXPIRATION_BUFFER_MINUTES): boolean => {
+    // type guards
     if (!accessToken || typeof accessToken !== "object") return true;
     if (!("access_token" in accessToken) || !("expiresAt" in accessToken)) return true;
     const tokenObj = accessToken as AccessTokenKVObject;
+    if (typeof tokenObj.expiresAt !== 'number') return true;
     // Check if it is going to expire in the next 15 minutes
     const currentUtcTimestampMs = Date.now();
-    if ((tokenObj.expiresAt - (EXPIRATION_BUFFER_MINUTES * 60 * 1000)) < currentUtcTimestampMs) {
+    if ((tokenObj.expiresAt - (expirationBufferMinutes * 60 * 1000)) < currentUtcTimestampMs) {
         return true;
     }
     return false;
 }
-
 
 export async function setRefreshToken(item_finder_kv: KVNamespace, EBAY_TOKEN_KEY: string) {
     // Get the current token from the KV 
