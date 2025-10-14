@@ -21,8 +21,8 @@ export default {
                     eq(search.active, true),
                     or(
                         // This is a search that has not run yet
-                        isNull(search.nextRun),
-                        lte(search.nextRun, now)
+                        isNull(search.lastRunAt),
+                        lte(search.lastRunAt, now)
                     )
                 )
             );

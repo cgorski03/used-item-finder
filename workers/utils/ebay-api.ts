@@ -1,10 +1,10 @@
 import EbayAuthToken, { AccessTokenResponse } from 'ebay-oauth-nodejs-client';
 import type { components, operations } from '../shared/types/ebay';
 
-type EbayItemSummary = components['schemas']['ItemSummary'];
-type EbaySearchQuery = operations['search']['parameters']['query'];
-type EbaySearchHeaders = operations['search']['parameters']['header'];
-type EbaySearchResponse = components['schemas']['SearchPagedCollection'];
+export type EbayItemSummary = components['schemas']['ItemSummary'];
+export type EbaySearchQuery = operations['search']['parameters']['query'];
+export type EbaySearchHeaders = operations['search']['parameters']['header'];
+export type EbaySearchResponse = components['schemas']['SearchPagedCollection'];
 
 const getEbayEnv = (): 'PRODUCTION' | 'SANDBOX' => {
     const env = process.env.EBAY_ENV!;
@@ -47,10 +47,12 @@ export const getAccessToken = async (): Promise<AccessTokenResponse> => {
     return await token.getApplicationToken(env);
 }
 
-export async function searchEbay(keywords: string, accessToken: string): Promise<EbayItemSummary[] | null> {
+export async function searchEbay(keywords: string, accessToken: string): Promise<EbayItemSummary[]> {
     const endpoint = getBaseUrl();
     const queryParams: EbaySearchQuery = {
         q: keywords,
+        limit: "50",
+        offset: "0"
     };
     const searchParams = getUrlSearchParams(queryParams);
     const headers = getEbaySearchHeaders(accessToken);
@@ -67,12 +69,20 @@ export async function searchEbay(keywords: string, accessToken: string): Promise
                 `eBay Browse API Error (${response.status} ${response.statusText}):`,
                 errorText,
             );
-            return null;
         }
         const data: EbaySearchResponse = await response.json();
         return data.itemSummaries || [];
     } catch (error: any) {
-        console.error(`error: ${error}`);
+        console.error(`error(ebay-api.searchEbay): ${error}`);
         throw (error);
     }
 }
+
+export const hasRequiredFieldsForDb = (ebayItem: EbayItemSummary): boolean => (
+    !ebayItem.itemId ||
+    !ebayItem.title ||
+    !ebayItem.price?.value ||
+    !ebayItem.price?.currency ||
+    !ebayItem.itemWebUrl)
+
+
