@@ -1,0 +1,19 @@
+{
+  "name": "@workers/shared",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "index.ts",
+  "exports": {
+    ".": "./index.ts",
+    "./auth": "./auth/jwt-handler.ts",
+    "./utils": "./utils/response.ts",
+    "./validation": "./utils/validation.ts",
+    "./constants": "./constants/endpoints.ts"
+  },
+  "scripts": {
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^1.0.2"
+  }
+}

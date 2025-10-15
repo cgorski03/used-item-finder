@@ -1,0 +1,47 @@
+{
+    "name": "search-coordinator-worker",
+    "main": "src/index.ts",
+    "compatibility_date": "2024-01-01",
+    "compatibility_flags": [
+        "nodejs_compat"
+    ],
+    "vars": {
+        "DATABASE_URL": "placeholder",
+    },
+    "bindings": [
+        {
+            "type": "queue",
+            "name": "search_jobs_queue",
+            "queue_name": "search-processing-queue"
+        },
+        {
+            "type": "kv_namespace",
+            "name": "ITEM_FINDER",
+            "id": "a87b796b3e2d4131a01c8d5d529fafee"
+        }
+    ],
+    "triggers": {
+        "crons": [
+            "*/15 * * * *"
+        ]
+    },
+	"queues": {
+		"producers": [],
+		"consumers": [
+			{
+				"queue": "search-processing-queue",
+				"dead_letter_queue": "search-processing-dlq",
+				"max_batch_size": 50,
+				"max_batch_timeout": 30,
+				"max_retries": 5,
+				"max_concurrency": 10
+			}
+		]
+	},
+	"kv_namespaces": [
+		{
+			"binding": "ITEM_FINDER",
+			"id": "a87b796b3e2d4131a01c8d5d529fafee"
+		}
+	]
+}
