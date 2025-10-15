@@ -12,7 +12,6 @@
   },
   "scripts": {
     "clean": "rm -rf dist"
-    "test": "vitest run --dir ./workers",
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.2"
