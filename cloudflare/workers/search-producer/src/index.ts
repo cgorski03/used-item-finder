@@ -1,7 +1,6 @@
 import { and, eq, isNull, lte, or } from "drizzle-orm";
-import { db } from "@shared/db/client";
-import { search } from '@shared/db/schema';
-import { setEbayToken } from "@shared/utils/set-oauth-token";
+import { db, search } from "@db";
+import { setEbayToken } from "@workers/shared";
 
 type Env = {
     DATABASE_URL: string;

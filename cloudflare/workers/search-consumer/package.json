@@ -1,5 +1,5 @@
 {
-	"name": "search-consumer",
+	"name": "@workers/search-consumer",
 	"version": "0.0.0",
 	"private": true,
 	"scripts": {
@@ -9,6 +9,9 @@
 		"test": "vitest",
 		"cf-typegen": "wrangler types"
 	},
-	"devDependencies": {
+	"dependencies": {
+		"@db": "workspace:*",
+		"@workers/shared": "workspace:*",
+		"drizzle-orm": "^0.44.6"
 	}
 }

@@ -1,8 +1,7 @@
 import { eq } from "drizzle-orm";
-import { db } from '@shared/db/client'
-import { search, item } from '@shared/db/schema';
-import { parseAccessToken } from '@shared/utils/set-oauth-token';
-import { EbayItemSummary, searchEbay } from '@shared/utils/ebay-api';
+import { db, item, search } from '@db'
+import { parseAccessToken } from '@workers/shared';
+import { EbayItemSummary, searchEbay } from '@workers/shared';
 
 type Env = {
     DATABASE_URL: string;

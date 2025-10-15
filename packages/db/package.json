@@ -1,0 +1,15 @@
+{
+	"name": "@db",
+	"version": "0.0.0",
+	"scripts": {
+		"db:push": "npx drizzle-kit push"
+	},
+	"dependencies": {
+		"drizzle-orm": "^0.44.6",
+		"pg": "^8.16.3",
+		"postgres": "^3.4.7"
+	},
+	"devDependencies": {
+		"drizzle-kit": "^0.31.5"
+	}
+}

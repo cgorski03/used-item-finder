@@ -88,5 +88,5 @@ declare module 'ebay-oauth-nodejs-client' {
         getRefreshToken(): string | undefined;
     }
 
-    export = EbayAuthToken;
+    export default EbayAuthToken;
 }

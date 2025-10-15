@@ -1,1 +1,0 @@
-../../../../src/server/db/schema.ts

@@ -1,5 +1,5 @@
 import EbayAuthToken, { AccessTokenResponse } from 'ebay-oauth-nodejs-client';
-import type { components, operations } from '@shared/types/ebay';
+import type { components, operations } from '../types/ebay';
 
 export type EbayItemSummary = components['schemas']['ItemSummary'];
 export type EbaySearchQuery = operations['search']['parameters']['query'];
