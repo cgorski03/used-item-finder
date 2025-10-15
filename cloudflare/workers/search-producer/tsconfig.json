@@ -9,13 +9,15 @@
     "src/**/*.ts",
     "src/**/*.js"
   ],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.js",
+    "./worker-configuration.d.ts"
+  ],
   "exclude": [
     "node_modules",
     "dist",
     "**/*.test.ts",
     "**/*.test.js"
-  ],
-  "references": [
-    { "path": "../shared" }
   ]
 }

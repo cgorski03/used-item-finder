@@ -15,7 +15,7 @@ export default {
         console.log('Request triggered');
         try {
             // All searches that should be published to the queue
-            const searches = await db.select().from(search).where(
+            const searches = await (await db).select().from(search).where(
                 and(
                     eq(search.active, true),
                     or(

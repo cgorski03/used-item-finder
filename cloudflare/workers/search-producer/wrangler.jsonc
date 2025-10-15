@@ -8,18 +8,6 @@
     "vars": {
         "DATABASE_URL": "placeholder",
     },
-    "bindings": [
-        {
-            "type": "queue",
-            "name": "search_jobs_queue",
-            "queue_name": "search-processing-queue"
-        },
-        {
-            "type": "kv_namespace",
-            "name": "ITEM_FINDER",
-            "id": "a87b796b3e2d4131a01c8d5d529fafee"
-        }
-    ],
     "triggers": {
         "crons": [
             "*/15 * * * *"

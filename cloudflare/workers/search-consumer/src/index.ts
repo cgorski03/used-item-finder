@@ -3,11 +3,6 @@ import { db, item, search } from '@db'
 import { parseAccessToken } from '@workers/shared';
 import { EbayItemSummary, searchEbay } from '@workers/shared';
 
-type Env = {
-    DATABASE_URL: string;
-    ITEM_FINDER: KVNamespace;
-    EBAY_TOKEN_KEY: string;
-}
 
 const createDbItemObjectFromSummary = (ebayItem: EbayItemSummary) => {
     if (!ebayItem.itemId ||
@@ -49,7 +44,7 @@ export default {
         }
         const searchId = body.search_id;
         try {
-            const searchRes = await db.select().from(search).where(eq(search.id, searchId)).limit(1);
+            const searchRes = await (await db).select().from(search).where(eq(search.id, searchId)).limit(1);
             if (searchRes.length === 0) {
                 throw new Error(`Search ${searchId} not found`)
             }
@@ -70,7 +65,7 @@ export default {
                 }
             }).filter((it) => it != null);
             // Save the items in the db 
-            await db.transaction(
+            await (await db).transaction(
                 async (tx) => {
 
                     await tx.insert(item).values(items)

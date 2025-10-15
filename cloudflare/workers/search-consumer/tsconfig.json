@@ -7,15 +7,12 @@
   },
   "include": [
     "src/**/*.ts",
-    "src/**/*.js"
+    "src/**/*.js",
+    "./worker-configuration.d.ts"
   ],
   "exclude": [
     "node_modules",
     "dist",
     "**/*.test.ts",
     "**/*.test.js"
-  ],
-  "references": [
-    { "path": "../shared" }
-  ]
-}
+  ]}
