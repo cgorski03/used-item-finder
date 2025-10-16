@@ -1,10 +1,11 @@
 import { getAccessToken } from "./ebay-api";
+import { vi, describe, beforeEach, it, expect } from 'vitest';
 
-jest.mock('ebay-oauth-nodejs-client', () => ({
+vi.mock('ebay-oauth-nodejs-client', () => ({
     __esModule: true,
-    default: jest.fn().mockImplementation(() => {
+    default: vi.fn().mockImplementation(() => {
         return {
-            getApplicationToken: jest.fn().mockResolvedValue({
+            getApplicationToken: vi.fn().mockResolvedValue({
                 access_token: 'mock-token',
                 expires_in: 7200
             })

@@ -1,8 +1,9 @@
 import { shouldGetNewToken, setEbayToken } from "./set-oauth-token";
+import { vi, describe, beforeEach, it, expect } from 'vitest';
 
-jest.mock('./ebay-api', () => ({
-    ...jest.requireActual('./ebay-api'),
-    getAccessToken: jest.fn().mockResolvedValue({
+vi.mock('./ebay-api', () => ({
+    ...vi.importActual('./ebay-api'),
+    getAccessToken: vi.fn().mockResolvedValue({
         access_token: 'valid-token',
         expires_in: 7200
     })
@@ -20,11 +21,11 @@ describe('setRefreshToken', () => {
 
     it('should not refresh a valid token', async () => {
         const mockKV = {
-            get: jest.fn().mockReturnValue({
+            get: vi.fn().mockReturnValue({
                 access_token: 'valid-token',
                 expires_at: Date.now() + 30 * 60 * 1000
             }),
-            put: jest.fn()
+            put: vi.fn()
         };
 
         await setEbayToken(mockKV, 'TOKEN_KEY');
@@ -32,11 +33,11 @@ describe('setRefreshToken', () => {
     });
     it('should refresh an invalid token', async () => {
         const mockKV = {
-            get: jest.fn().mockReturnValue({
+            get: vi.fn().mockReturnValue({
                 access_token: 'invalid-token',
                 expires_at: Date.now() - 30 * 60 * 1000
             }),
-            put: jest.fn()
+            put: vi.fn()
         };
 
         await setEbayToken(mockKV, 'TOKEN_KEY');

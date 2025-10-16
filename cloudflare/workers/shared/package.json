@@ -5,5 +5,8 @@
   "main": "index.ts",
   "dependencies": {
     "ebay-oauth-nodejs-client": "^1.2.2"
+  },
+  "devDependencies": {
+    "vitest": "~3.2.4"
   }
 }
