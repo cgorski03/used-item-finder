@@ -13,5 +13,9 @@
 		"@db": "workspace:*",
 		"@workers/shared": "workspace:*",
 		"drizzle-orm": "^0.44.6"
+	},
+	"devDependencies": {
+		"@cloudflare/vitest-pool-workers": "^0.9.13",
+		"vitest": "~3.2.4"
 	}
 }
