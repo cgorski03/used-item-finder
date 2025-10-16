@@ -1,5 +1,5 @@
 {
-    "name": "search-coordinator-worker",
+    "name": "search-processing-worker",
     "main": "src/index.ts",
     "compatibility_date": "2024-01-01",
     "compatibility_flags": [
@@ -7,23 +7,14 @@
     ],
     "vars": {
         "DATABASE_URL": "placeholder",
-        "EBAY_TOKEN_KEY": "placeholder"
-    },
-    "triggers": {
-        "crons": [
-            "*/15 * * * *"
-        ]
+        "EBAY_KV_KEY": "placeholder"
     },
 	"queues": {
 		"producers": [],
 		"consumers": [
 			{
 				"queue": "search-processing-queue",
-				"dead_letter_queue": "search-processing-dlq",
-				"max_batch_size": 50,
-				"max_batch_timeout": 30,
-				"max_retries": 5,
-				"max_concurrency": 10
+                "binding": "search_jobs_queue"
 			}
 		]
 	},

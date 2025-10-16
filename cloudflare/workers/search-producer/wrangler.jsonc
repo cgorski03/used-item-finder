@@ -7,6 +7,7 @@
     ],
     "vars": {
         "DATABASE_URL": "placeholder",
+        "EBAY_KV_KEY": "placeholder",
     },
     "triggers": {
         "crons": [
@@ -14,17 +15,12 @@
         ]
     },
 	"queues": {
-		"producers": [],
-		"consumers": [
-			{
+		"producers": [
+            {
 				"queue": "search-processing-queue",
-				"dead_letter_queue": "search-processing-dlq",
-				"max_batch_size": 50,
-				"max_batch_timeout": 30,
-				"max_retries": 5,
-				"max_concurrency": 10
+                "binding": "search_jobs_queue"
 			}
-		]
+        ]
 	},
 	"kv_namespaces": [
 		{

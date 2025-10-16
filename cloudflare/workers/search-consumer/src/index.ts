@@ -49,7 +49,7 @@ export default {
                 throw new Error(`Search ${searchId} not found`)
             }
             const searchInfo = searchRes[0];
-            const accessToken = parseAccessToken(await env.ITEM_FINDER.get(env.EBAY_TOKEN_KEY, { type: 'json' }));
+            const accessToken = parseAccessToken(await env.ITEM_FINDER.get(env.EBAY_KV_KEY, { type: 'json' }));
             if (!accessToken) {
                 throw new Error('No access token');
             }
