@@ -12,5 +12,4 @@ const connectAndDrizzle = async () => {
 };
 
 export const db = connectAndDrizzle();
-
 export const pgClient = client;

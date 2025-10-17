@@ -2,8 +2,8 @@
 	"name": "@db",
 	"version": "0.0.0",
 	"scripts": {
-        "build": "tsc",
-		"db:push": "npx drizzle-kit push"
+		"build": "tsc",
+		"db:push": "pnpm drizzle-kit push"
 	},
 	"dependencies": {
 		"drizzle-orm": "^0.44.6",
@@ -11,6 +11,7 @@
 		"postgres": "^3.4.7"
 	},
 	"devDependencies": {
+		"@types/pg": "^8.15.5",
 		"drizzle-kit": "^0.31.5"
 	}
 }
