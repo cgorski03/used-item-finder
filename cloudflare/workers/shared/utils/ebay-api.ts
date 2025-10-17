@@ -1,4 +1,4 @@
-import EbayAuthToken, { AccessTokenResponse } from 'ebay-oauth-nodejs-client';
+import EbayAuthToken, { AccessTokenResponse, EbayAuthTokenOptions, EbayEnv } from 'ebay-oauth-nodejs-client';
 import type { components, operations } from '../types/ebay';
 
 export type EbayItemSummary = components['schemas']['ItemSummary'];
@@ -6,16 +6,8 @@ export type EbaySearchQuery = operations['search']['parameters']['query'];
 export type EbaySearchHeaders = operations['search']['parameters']['header'];
 export type EbaySearchResponse = components['schemas']['SearchPagedCollection'];
 
-const getEbayEnv = (): 'PRODUCTION' | 'SANDBOX' => {
-    const env = process.env.EBAY_ENV!;
-    if (env !== 'PRODUCTION' && env !== 'SANDBOX') {
-        throw new Error('Environment must be set');
-    }
-    return env;
-}
-
-const getBaseUrl = (): string => {
-    const baseUrl = getEbayEnv() === 'PRODUCTION' ? 'api.ebay.com' : 'api.sandbox.ebay.com';
+const getBaseUrl = (ebayEnv: EbayEnv): string => {
+    const baseUrl = ebayEnv === 'PRODUCTION' ? 'api.ebay.com' : 'api.sandbox.ebay.com';
     return `https://${baseUrl}/buy/browse/v1/item_summary/search`;
 }
 
@@ -35,20 +27,13 @@ const getEbaySearchHeaders = (token: string) => ({
     'X-EBAY-C-MARKETPLACE-ID': 'EBAY_US',
 });
 
-export const getAccessToken = async (): Promise<AccessTokenResponse> => {
-    const options = {
-        clientId: process.env.clientId!,
-        clientSecret: process.env.clientSecret!,
-        devid: process.env.devId!
-    }
-
-    const env = getEbayEnv();
+export const getAccessToken = async (options: EbayAuthTokenOptions): Promise<AccessTokenResponse> => {
     const token = new EbayAuthToken(options)
-    return await token.getApplicationToken(env);
+    return await token.getApplicationToken(options.env);
 }
 
-export async function searchEbay(keywords: string, accessToken: string): Promise<EbayItemSummary[]> {
-    const endpoint = getBaseUrl();
+export async function searchEbay(keywords: string, accessToken: string, ebayEnv: EbayEnv): Promise<EbayItemSummary[]> {
+    const endpoint = getBaseUrl(ebayEnv);
     const queryParams: EbaySearchQuery = {
         q: keywords,
         limit: "50",

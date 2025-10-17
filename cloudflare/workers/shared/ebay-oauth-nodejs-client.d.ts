@@ -1,13 +1,13 @@
 declare module 'ebay-oauth-nodejs-client' {
-    interface EbayAuthTokenOptions {
+    export interface EbayAuthTokenOptions {
         filePath?: string;
         clientId?: string;
         clientSecret?: string;
         redirectUri?: string;
         devid?: string;
-        env?: 'PRODUCTION' | 'SANDBOX';
+        env: EbayEnv;
     }
-
+    export type EbayEnv = 'PRODUCTION' | 'SANDBOX'
     export interface AccessTokenResponse {
         access_token: string;
         expires_in: number;
@@ -16,7 +16,7 @@ declare module 'ebay-oauth-nodejs-client' {
         refresh_token_expires_in?: number;
     }
 
-    interface UserAuthorizationUrlOptions {
+    export interface UserAuthorizationUrlOptions {
         prompt?: 'login';
         state?: string;
     }
@@ -32,7 +32,7 @@ declare module 'ebay-oauth-nodejs-client' {
          * @return A Promise that resolves with the access token object.
          */
         getApplicationToken(
-            environment: 'PRODUCTION' | 'SANDBOX',
+            environment: EbayEnv,
             scopes?: string | string[]
         ): Promise<AccessTokenResponse>;
 
@@ -46,7 +46,7 @@ declare module 'ebay-oauth-nodejs-client' {
          * @return The user consent URL.
          */
         generateUserAuthorizationUrl(
-            environment: 'PRODUCTION' | 'SANDBOX',
+            environment: EbayEnv,
             scopes: string | string[],
             options?: UserAuthorizationUrlOptions
         ): string;
@@ -58,7 +58,7 @@ declare module 'ebay-oauth-nodejs-client' {
          * @return A Promise that resolves with the access token object.
          */
         exchangeCodeForAccessToken(
-            environment: 'PRODUCTION' | 'SANDBOX',
+            environment: EbayEnv,
             code: string
         ): Promise<string>;
 
@@ -70,7 +70,7 @@ declare module 'ebay-oauth-nodejs-client' {
          * @return A Promise that resolves with the access token object.
          */
         getAccessToken(
-            environment: 'PRODUCTION' | 'SANDBOX',
+            environment: EbayEnv,
             refreshToken: string,
             scopes: string | string[]
         ): Promise<string>;

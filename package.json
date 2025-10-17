@@ -6,7 +6,8 @@
     "build": "pnpm -r build",
     "dev": "pnpm --filter web dev",
     "test": "pnpm -r test",
-    "lint": "pnpm -r lint"
+    "lint": "pnpm -r lint",
+    "db:push": "pnpm --filter packages/db drizzle-kit push"
   },
   "devDependencies": {
     "typescript": "^5"
