@@ -1,6 +1,6 @@
 import { SELF, env } from "cloudflare:test";
 import { expect, it, beforeEach } from "vitest";
-import { getWorkerDb, search, eq } from "@db";
+import { getWorkerDb, search, eq, closeWorkerDb } from "@db";
 
 beforeEach(async () => {
     // Connect to test database
@@ -14,7 +14,6 @@ it("queues searches when found", async () => {
     console.log(env);
     console.log("starting");
     const db = getWorkerDb(env.DATABASE_URL);
-    console.log()
     await db.insert(search).values({
         userId: 0,
         active: true,
@@ -24,6 +23,7 @@ it("queues searches when found", async () => {
         updatedAt: new Date(Date.now() - 2000000),
         lastRunAt: new Date(Date.now() - 1000000),
     });
+    await closeWorkerDb();
 
     // ACT - Call worker via SELF
     const response = await SELF.fetch("https://example.com/");
