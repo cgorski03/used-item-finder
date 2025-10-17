@@ -1,13 +1,17 @@
 {
     "name": "search-coordinator-worker",
     "main": "src/index.ts",
-    "compatibility_date": "2024-01-01",
+    "compatibility_date": "2024-09-23",
     "compatibility_flags": [
         "nodejs_compat"
     ],
     "vars": {
         "DATABASE_URL": "placeholder",
         "EBAY_KV_KEY": "placeholder",
+        "EBAY_CLIENT_ID": "placeholder",
+        "EBAY_CLIENT_SECRET": "placeholder",
+        "EBAY_DEV_ID": "placeholder",
+        "EBAY_ENV": "SANDBOX",
     },
     "triggers": {
         "crons": [

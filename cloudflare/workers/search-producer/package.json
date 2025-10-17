@@ -12,7 +12,6 @@
 	"dependencies": {
 		"@db": "workspace:*",
 		"@workers/shared": "workspace:*",
-		"drizzle-orm": "^0.44.6",
 		"wrangler": "^4.43.0"
 	},
 	"devDependencies": {
