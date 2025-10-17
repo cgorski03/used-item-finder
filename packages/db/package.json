@@ -2,6 +2,7 @@
 	"name": "@db",
 	"version": "0.0.0",
 	"scripts": {
+        "build": "tsc",
 		"db:push": "npx drizzle-kit push"
 	},
 	"dependencies": {
