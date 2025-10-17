@@ -19,6 +19,7 @@ export {
     like,
     ilike,
     between,
+    sql,
     exists,
     type SQL,
 } from "drizzle-orm";

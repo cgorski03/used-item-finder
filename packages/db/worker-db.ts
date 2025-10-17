@@ -5,19 +5,16 @@ import * as schema from './schema';
 export type WorkerDb = ReturnType<typeof getWorkerDb>;
 export type WorkerDbConnection = ReturnType<typeof postgres>;
 
-let _cachedConnection: WorkerDbConnection | undefined;
-
+let _client: ReturnType<typeof postgres> | undefined;
 
 export function getWorkerDb(connectionString: string) {
-    if (!_cachedConnection) {
-        _cachedConnection = postgres(connectionString);
-    }
-    return drizzle(_cachedConnection, { schema });
+    _client = postgres(connectionString);
+    return drizzle(_client, { schema });
 }
 
 export async function closeWorkerDb() {
-    if (!_cachedConnection) {
+    if (!_client) {
         return;
     }
-    await _cachedConnection.end();
+    await _client.end();
 }

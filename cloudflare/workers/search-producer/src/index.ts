@@ -6,8 +6,6 @@ import { getSearchesToQueue } from "./search-logic";
 export default {
     async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
         const db = getWorkerDb(env.DATABASE_URL);
-        console.log(env);
-        console.log('Request triggered');
         try {
             const ebayOptions: EbayAuthTokenOptions = {
                 clientId: env.EBAY_CLIENT_ID,
@@ -23,8 +21,10 @@ export default {
                 body: { search_id: search.id },
             }));
             // Queue.sendBatch allows sending multiple messages at once
-            await env.search_jobs_queue.sendBatch(messagesToSend);
-            console.log(`Queued ${messagesToSend.length} search jobs to Cloudflare Queue.`);
+            if (messagesToSend.length > 0) {
+                await env.search_jobs_queue.sendBatch(messagesToSend);
+                console.log(`Queued ${messagesToSend.length} search jobs to Cloudflare Queue.`);
+            }
             return new Response(JSON.stringify({
                 success: true,
                 searchesQueued: searchesToQueue.length,
