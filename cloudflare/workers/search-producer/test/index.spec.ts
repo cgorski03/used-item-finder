@@ -5,8 +5,7 @@ import { getWorkerDb, search, eq } from "@db";
 beforeEach(async () => {
     // Connect to test database
     const db = getWorkerDb(env.DATABASE_URL);
-
-    // Clean up
+    // Clean up from previous test
     await db.delete(search);
 });
 
@@ -14,7 +13,7 @@ it("queues searches when found", async () => {
     // ARRANGE - Seed with drizzle
     console.log(env);
     console.log("starting");
-    const db = getWorkerDb(process.env.DATABASE_URL!);
+    const db = getWorkerDb(env.DATABASE_URL);
     console.log()
     await db.insert(search).values({
         userId: 0,
