@@ -1,35 +1,79 @@
 {
-    "name": "search-coordinator-worker",
-    "main": "src/index.ts",
-    "compatibility_date": "2024-09-23",
-    "compatibility_flags": [
-        "nodejs_compat"
-    ],
-    "vars": {
-        "DATABASE_URL": "placeholder",
-        "EBAY_KV_KEY": "placeholder",
-        "EBAY_CLIENT_ID": "placeholder",
-        "EBAY_CLIENT_SECRET": "placeholder",
-        "EBAY_DEV_ID": "placeholder",
-        "EBAY_ENV": "SANDBOX",
-    },
-    "triggers": {
-        "crons": [
-            "*/15 * * * *"
+	"name": "search-coordinator-worker",
+	"main": "src/index.ts",
+	"compatibility_date": "2025-08-15",
+	"compatibility_flags": [
+		"nodejs_compat"
+	],
+	"vars": {
+		"DATABASE_URL": "placeholder",
+		"EBAY_KV_KEY": "placeholder",
+		"EBAY_CLIENT_ID": "placeholder",
+		"EBAY_CLIENT_SECRET": "placeholder",
+		"EBAY_DEV_ID": "placeholder",
+		"EBAY_ENV": "SANDBOX"
+	},
+	"env": {
+		"dev": {
+			"vars": {
+				"DATABASE_URL": "postgres://colin:secure_password@localhost:5432/itemfinder_test",
+				"EBAY_KV_KEY": "EBAY_AUTH",
+				"EBAY_ENV": "SANDBOX"
+			},
+            "queues": {
+                "producers": [
+                    {
+                        "queue": "search-processing-queue",
+                        "binding": "search_jobs_queue"
+                    }
+                ]
+            },
+            "kv_namespaces": [
+            {
+                "binding": "AUTH_TOKEN_KV",
+                "id": "fa93f7e7725a4eb4af55ff12b03ff810"
+            }
         ]
-    },
+		},
+		"test": {
+			"vars": {
+				"DATABASE_URL": "postgres://colin:secure_password@localhost:5432/itemfinder_test",
+				"EBAY_KV_KEY": "EBAY_AUTH",
+				"EBAY_ENV": "SANDBOX"
+			},
+            "queues": {
+                "producers": [
+                    {
+                        "queue": "search-processing-queue",
+                        "binding": "search_jobs_queue"
+                    }
+                ]
+            },
+            "kv_namespaces": [
+            {
+                "binding": "AUTH_TOKEN_KV",
+                "id": "fa93f7e7725a4eb4af55ff12b03ff810"
+            }
+        ]
+		},
+	},
+	"triggers": {
+		"crons": [
+			"*/15 * * * *"
+		]
+	},
 	"queues": {
 		"producers": [
-            {
+			{
 				"queue": "search-processing-queue",
-                "binding": "search_jobs_queue"
+				"binding": "search_jobs_queue"
 			}
-        ]
+		]
 	},
 	"kv_namespaces": [
 		{
-			"binding": "ITEM_FINDER",
-			"id": "a87b796b3e2d4131a01c8d5d529fafee"
+			"binding": "AUTH_TOKEN_KV",
+			"id": "fa93f7e7725a4eb4af55ff12b03ff810"
 		}
 	]
 }

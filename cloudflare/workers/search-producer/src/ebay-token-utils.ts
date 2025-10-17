@@ -27,6 +27,7 @@ export async function setEbayToken(item_finder_kv: KVNamespace, EBAY_TOKEN_KEY: 
             access_token: newToken.access_token,
             expires_at: Date.now() + newToken.expires_in * 1000
         }
+        console.log('kvObj');
         // Save new token
         await item_finder_kv.put(EBAY_TOKEN_KEY, JSON.stringify(kvObj))
     } catch (error: any) {

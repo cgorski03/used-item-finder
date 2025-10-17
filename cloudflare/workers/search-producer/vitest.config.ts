@@ -5,7 +5,7 @@ export default defineWorkersConfig({
         name: 'search-producer-tests',
         poolOptions: {
             workers: {
-                wrangler: { configPath: "./wrangler.jsonc" }
+                wrangler: { configPath: "./wrangler.jsonc", environment: "test" }
             },
         },
     },

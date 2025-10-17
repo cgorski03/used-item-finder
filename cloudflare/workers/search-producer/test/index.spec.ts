@@ -1,24 +1,36 @@
-import { env, createExecutionContext, waitOnExecutionContext, SELF } from 'cloudflare:test';
-import { describe, it, expect } from 'vitest';
-import worker from '../src/index';
+import { SELF, env } from "cloudflare:test";
+import { expect, it, beforeEach } from "vitest";
+import { getWorkerDb, search, eq } from "@db";
 
-// For now, you'll need to do something like this to get a correctly-typed
-// `Request` to pass to `worker.fetch()`.
-const IncomingRequest = Request<unknown, IncomingRequestCfProperties>;
+beforeEach(async () => {
+    // Connect to test database
+    const db = getWorkerDb(env.DATABASE_URL);
 
-describe('Hello World worker', () => {
-    it('responds with Hello World! (unit style)', async () => {
-        const request = new IncomingRequest('http://example.com');
-        // Create an empty context to pass to `worker.fetch()`.
-        const ctx = createExecutionContext();
-        const response = await worker.fetch(request, env, ctx);
-        // Wait for all `Promise`s passed to `ctx.waitUntil()` to settle before running test assertions
-        await waitOnExecutionContext(ctx);
-        expect(await response.text()).toMatchInlineSnapshot(`"Hello World!"`);
+    // Clean up
+    await db.delete(search);
+});
+
+it("queues searches when found", async () => {
+    // ARRANGE - Seed with drizzle
+    console.log(env);
+    console.log("starting");
+    const db = getWorkerDb(process.env.DATABASE_URL!);
+    console.log()
+    await db.insert(search).values({
+        userId: 0,
+        active: true,
+        keywords: "fkldsA",
+        pollIntervalMinutes: 15,
+        createdAt: new Date(Date.now() - 2000000),
+        updatedAt: new Date(Date.now() - 2000000),
+        lastRunAt: new Date(Date.now() - 1000000),
     });
 
-    it('responds with Hello World! (integration style)', async () => {
-        const response = await SELF.fetch('https://example.com');
-        expect(await response.text()).toMatchInlineSnapshot(`"Hello World!"`);
-    });
+    // ACT - Call worker via SELF
+    const response = await SELF.fetch("https://example.com/");
+
+    // ASSERT - Verify with drizzle
+    expect(response.status).toBe(200);
+    const result = await response.json() as any;
+    expect(result.searchesQueued).toBe(1);
 });
