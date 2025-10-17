@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
-import { db, item, search } from '@db'
-import { parseAccessToken } from '@workers/shared';
+import { getWorkerDb, item, search } from '@db'
+import { parseAccessToken, SearchMessage } from '@workers/shared';
 import { EbayItemSummary, searchEbay } from '@workers/shared';
 
 
@@ -20,8 +20,7 @@ const createDbItemObjectFromSummary = (ebayItem: EbayItemSummary) => {
         url: ebayItem.itemWebUrl,
         primaryImageUrl: ebayItem.image?.imageUrl,
         additionalImageUrls: ebayItem.additionalImages?.map(img => img.imageUrl!).filter(Boolean) as string[],
-        condition: ebayItem.condition,
-        conditionId: ebayItem.conditionId,
+        condition: ebayItem.condition, conditionId: ebayItem.conditionId,
         buyingOptions: ebayItem.buyingOptions,
         itemCreationDate: ebayItem.itemCreationDate ? new Date(ebayItem.itemCreationDate) : undefined,
         itemEndDate: ebayItem.itemEndDate ? new Date(ebayItem.itemEndDate) : undefined,
@@ -30,18 +29,21 @@ const createDbItemObjectFromSummary = (ebayItem: EbayItemSummary) => {
     };
 }
 
+
+
 export default {
-    async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
-        const body = request.body;
-        if (!body ||
-            typeof body !== 'object' ||
-            !('search_id' in body) ||
-            typeof body.search_id !== 'number') {
-            return new Response(JSON.stringify({
-                success: false,
-                error: 'missing search_id in body'
-            }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+    async queue(batch: MessageBatch<SearchMessage>, env: Env) {
+
+        // If we don't have an access token, no searches will be successful!
+        const accessToken = parseAccessToken(await env.AUTH_TOKEN_KV.get(env.EBAY_KV_KEY, { type: 'json' }));
+        if (!accessToken) {
+            throw new Error('No access token');
         }
+        const searchIds = batch.messages.map((message) => {
+            return message.body.search_id
+        });
+        const db = getWorkerDb(env.DATABASE_URL);
+
         const searchId = body.search_id;
         try {
             const searchRes = await (await db).select().from(search).where(eq(search.id, searchId)).limit(1);
@@ -49,10 +51,6 @@ export default {
                 throw new Error(`Search ${searchId} not found`)
             }
             const searchInfo = searchRes[0];
-            const accessToken = parseAccessToken(await env.ITEM_FINDER.get(env.EBAY_KV_KEY, { type: 'json' }));
-            if (!accessToken) {
-                throw new Error('No access token');
-            }
             const searchResults = await searchEbay(searchInfo.keywords, accessToken.access_token);
 
             type NewItem = typeof item.$inferInsert;

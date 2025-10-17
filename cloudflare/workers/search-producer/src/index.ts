@@ -1,6 +1,6 @@
 import { closeWorkerDb, getWorkerDb, } from "@db";
 import { setEbayToken } from "./ebay-token-utils";
-import { EbayAuthTokenOptions } from "@workers/shared";
+import { EbayAuthTokenOptions, SearchMessage } from "@workers/shared";
 import { getSearchesToQueue } from "./search-logic";
 
 export default {
@@ -17,7 +17,7 @@ export default {
             const searchesToQueue = await getSearchesToQueue(db);
             await closeWorkerDb();
             console.log(`Found ${searchesToQueue.length} to add to queue`)
-            const messagesToSend = searchesToQueue.map(search => ({
+            const messagesToSend: { body: SearchMessage }[] = searchesToQueue.map(search => ({
                 body: { search_id: search.id },
             }));
             // Queue.sendBatch allows sending multiple messages at once
