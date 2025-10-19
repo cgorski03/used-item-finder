@@ -13,6 +13,7 @@ export default {
                 devid: env.EBAY_DEV_ID,
                 env: env.EBAY_ENV
             };
+            await setEbayToken(env.AUTH_TOKEN_KV, env.EBAY_KV_KEY, ebayOptions);
             const searchesToQueue = await getSearchesToQueue(db);
             await closeWorkerDb();
             console.log(`Found ${searchesToQueue.length} to add to queue`)

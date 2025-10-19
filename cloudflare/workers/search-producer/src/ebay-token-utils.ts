@@ -23,6 +23,7 @@ export async function setEbayToken(item_finder_kv: KVNamespace, EBAY_TOKEN_KEY: 
     // Get another token
     try {
         const newToken = await getAccessToken(ebayCredentials)
+
         const kvObj: AccessTokenKVObject = {
             access_token: newToken.access_token,
             expires_at: Date.now() + newToken.expires_in * 1000
