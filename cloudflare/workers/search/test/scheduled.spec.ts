@@ -1,6 +1,12 @@
-import { SELF, env } from "cloudflare:test";
+import {
+    env,
+    createScheduledController,
+    createExecutionContext,
+    waitOnExecutionContext
+} from "cloudflare:test";
 import { expect, it, beforeEach, vi } from "vitest";
 import { getWorkerDb, search, closeWorkerDb } from "@db";
+import worker from '../src/index'
 
 beforeEach(async () => {
     // Connect to test database
@@ -8,7 +14,7 @@ beforeEach(async () => {
     // Clean up from previous test
     await db.delete(search);
     vi.clearAllMocks();
-    vi.spyOn(env.search_jobs_queue, "sendBatch").mockResolvedValue(undefined);
+    vi.spyOn(env.SEARCH_RUN_QUEUE, "sendBatch").mockResolvedValue(undefined);
     await env.AUTH_TOKEN_KV.delete(env.EBAY_KV_KEY);
 });
 
@@ -27,14 +33,20 @@ it("queues 1 search when it is found", async () => {
 
     await closeWorkerDb();
 
-    // ACT - Call worker via SELF
-    const response = await SELF.fetch("https://example.com/");
+    // ACT - Call scheduled handler
+    const ctrl = createScheduledController({
+        scheduledTime: new Date(),
+        cron: "*/15 * * * *"
+    });
+    const ctx = createExecutionContext();
+    const response = await worker.scheduled(ctrl, env, ctx);
+    await waitOnExecutionContext(ctx);
 
     // ASSERT 
     expect(response.status).toBe(200);
     const result = await response.json() as any;
     expect(result.searchesQueued).toBe(1);
-    expect(env.search_jobs_queue.sendBatch).toHaveBeenCalledWith([
+    expect(env.SEARCH_RUN_QUEUE.sendBatch).toHaveBeenCalledWith([
         { body: { search_id: inserted.search_id } }
     ]);
     // Ensure the KV was updated
@@ -76,14 +88,20 @@ it("queues only active searches with multiple searches", async () => {
 
     await closeWorkerDb();
 
-    // ACT - Call worker via SELF
-    const response = await SELF.fetch("https://example.com/");
+    // ACT - Call scheduled handler
+    const ctrl = createScheduledController({
+        scheduledTime: new Date(),
+        cron: "*/15 * * * *"
+    });
+    const ctx = createExecutionContext();
+    const response = await worker.scheduled(ctrl, env, ctx);
+    await waitOnExecutionContext(ctx);
 
     // ASSERT 
     expect(response.status).toBe(200);
     const result = await response.json() as any;
     expect(result.searchesQueued).toBe(2);
-    expect(env.search_jobs_queue.sendBatch).toHaveBeenCalledWith([
+    expect(env.SEARCH_RUN_QUEUE.sendBatch).toHaveBeenCalledWith([
         { body: { search_id: inserted[1].search_id } },
         { body: { search_id: inserted[2].search_id } }
     ]);
@@ -107,13 +125,19 @@ it("queues search that has never run (lastRunAt is null)", async () => {
     await closeWorkerDb();
 
     // ACT
-    const response = await SELF.fetch("https://example.com/");
+    const ctrl = createScheduledController({
+        scheduledTime: new Date(),
+        cron: "*/15 * * * *"
+    });
+    const ctx = createExecutionContext();
+    const response = await worker.scheduled(ctrl, env, ctx);
+    await waitOnExecutionContext(ctx);
 
     // ASSERT
     expect(response.status).toBe(200);
     const result = await response.json() as any;
     expect(result.searchesQueued).toBe(1);
-    expect(env.search_jobs_queue.sendBatch).toHaveBeenCalledWith([
+    expect(env.SEARCH_RUN_QUEUE.sendBatch).toHaveBeenCalledWith([
         { body: { search_id: inserted.search_id } }
     ]);
 });
@@ -134,13 +158,19 @@ it("doesn't queue search that ran recently", async () => {
     await closeWorkerDb();
 
     // ACT
-    const response = await SELF.fetch("https://example.com/");
+    const ctrl = createScheduledController({
+        scheduledTime: new Date(),
+        cron: "*/15 * * * *"
+    });
+    const ctx = createExecutionContext();
+    const response = await worker.scheduled(ctrl, env, ctx);
+    await waitOnExecutionContext(ctx);
 
     // ASSERT
     expect(response.status).toBe(200);
     const result = await response.json() as any;
     expect(result.searchesQueued).toBe(0);
-    expect(env.search_jobs_queue.sendBatch).not.toHaveBeenCalled();
+    expect(env.SEARCH_RUN_QUEUE.sendBatch).not.toHaveBeenCalled();
 });
 
 it("returns empty when no searches exist", async () => {
@@ -149,13 +179,19 @@ it("returns empty when no searches exist", async () => {
     await closeWorkerDb();
 
     // ACT
-    const response = await SELF.fetch("https://example.com/");
+    const ctrl = createScheduledController({
+        scheduledTime: new Date(),
+        cron: "*/15 * * * *"
+    });
+    const ctx = createExecutionContext();
+    const response = await worker.scheduled(ctrl, env, ctx);
+    await waitOnExecutionContext(ctx);
 
     // ASSERT
     expect(response.status).toBe(200);
     const result = await response.json() as any;
     expect(result.searchesQueued).toBe(0);
-    expect(env.search_jobs_queue.sendBatch).not.toHaveBeenCalled();
+    expect(env.SEARCH_RUN_QUEUE.sendBatch).not.toHaveBeenCalled();
 });
 
 it("queues mix of never-run and old searches", async () => {
@@ -194,13 +230,19 @@ it("queues mix of never-run and old searches", async () => {
     await closeWorkerDb();
 
     // ACT
-    const response = await SELF.fetch("https://example.com/");
+    const ctrl = createScheduledController({
+        scheduledTime: new Date(),
+        cron: "*/15 * * * *"
+    });
+    const ctx = createExecutionContext();
+    const response = await worker.scheduled(ctrl, env, ctx);
+    await waitOnExecutionContext(ctx);
 
     // ASSERT
     expect(response.status).toBe(200);
     const result = await response.json() as any;
     expect(result.searchesQueued).toBe(2); // neverRun + oldRun
-    expect(env.search_jobs_queue.sendBatch).toHaveBeenCalledWith([
+    expect(env.SEARCH_RUN_QUEUE.sendBatch).toHaveBeenCalledWith([
         { body: { search_id: inserted[0].search_id } },
         { body: { search_id: inserted[1].search_id } }
     ]);
@@ -234,7 +276,13 @@ it("handles different poll intervals correctly", async () => {
     await closeWorkerDb();
 
     // ACT
-    const response = await SELF.fetch("https://example.com/");
+    const ctrl = createScheduledController({
+        scheduledTime: new Date(),
+        cron: "*/15 * * * *"
+    });
+    const ctx = createExecutionContext();
+    const response = await worker.scheduled(ctrl, env, ctx);
+    await waitOnExecutionContext(ctx);
 
     // ASSERT
     expect(response.status).toBe(200);
@@ -263,7 +311,13 @@ it("handles error gracefully when KV fails", async () => {
     vi.spyOn(env.AUTH_TOKEN_KV, "put").mockRejectedValue(new Error("KV error"));
 
     // ACT
-    const response = await SELF.fetch("https://example.com/");
+    const ctrl = createScheduledController({
+        scheduledTime: new Date(),
+        cron: "*/15 * * * *"
+    });
+    const ctx = createExecutionContext();
+    const response = await worker.scheduled(ctrl, env, ctx);
+    await waitOnExecutionContext(ctx);
 
     // ASSERT - Should handle error gracefully
     expect(response.status).toBe(500);

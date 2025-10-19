@@ -1,7 +1,31 @@
-import { inArray, search, item, eq, WorkerDb } from "@db"
+import { WorkerDb, search, item, and, eq, isNull, lte, or, sql, inArray } from "@db";
 import { EbayItemSummary } from "@workers/shared";
 
 export type NewItem = typeof item.$inferInsert;
+export async function getSearchesToQueue(db: WorkerDb) {
+    try {
+        return await db
+            .select({ id: search.id })
+            .from(search)
+            .where(
+                and(
+                    eq(search.active, true),
+                    or(
+                        isNull(search.lastRunAt),
+                        lte(
+                            sql`${search.lastRunAt} + (${search.pollIntervalMinutes} * interval '1 minute')`,
+                            sql`now()`
+                        )
+                    )
+                )
+            );
+    }
+    catch (error: any) {
+        console.error(`Error retrieving searches from database ${error}`);
+        // Rethrow
+        throw new Error(error);
+    }
+}
 
 export const createDbItemObjectFromSummaryHelper = (ebayItem: EbayItemSummary) => {
     if (!ebayItem.itemId ||
@@ -51,3 +75,4 @@ export const saveItemsAndUpdateSearch = async (db: WorkerDb, items: NewItem[], s
         throw (error);
     }
 }
+

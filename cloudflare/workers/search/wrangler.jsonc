@@ -1,5 +1,5 @@
 {
-	"name": "search-processing-worker",
+	"name": "search-coordinator-worker",
 	"main": "src/index.ts",
 	"compatibility_date": "2025-08-15",
 	"compatibility_flags": [
@@ -8,6 +8,9 @@
 	"vars": {
 		"DATABASE_URL": "placeholder",
 		"EBAY_KV_KEY": "placeholder",
+		"EBAY_CLIENT_ID": "placeholder",
+		"EBAY_CLIENT_SECRET": "placeholder",
+		"EBAY_DEV_ID": "placeholder",
 		"EBAY_ENV": "SANDBOX"
 	},
 	"env": {
@@ -16,17 +19,23 @@
 				"DATABASE_URL": "postgres://colin:secure_password@localhost:5432/itemfinder_test",
 				"EBAY_KV_KEY": "EBAY_AUTH",
 				"EBAY_ENV": "SANDBOX",
+                "EBAY_CLIENT_ID": "placeholder",
+                "EBAY_CLIENT_SECRET": "placeholder",
+                "EBAY_DEV_ID": "placeholder"
 			},
             "queues": {
+                "producers": [
+                    {
+                        "queue": "search-run-queue",
+                        "binding": "SEARCH_RUN_QUEUE"
+                    }
+                ],
                 "consumers": [
                     {
-                        "queue": "search-processing-queue",
-                        "max_batch_size": 5,
-                        "max_batch_timeout": 10,
-                        "max_concurrency": 1
-
+                        "queue": "search-run-queue",
                     }
                 ]
+
             },
             "kv_namespaces": [
             {
@@ -40,17 +49,23 @@
 				"DATABASE_URL": "postgres://colin:secure_password@localhost:5432/itemfinder_test",
 				"EBAY_KV_KEY": "EBAY_AUTH",
 				"EBAY_ENV": "SANDBOX",
+                "EBAY_CLIENT_ID": "placeholder",
+                "EBAY_CLIENT_SECRET": "placeholder",
+                "EBAY_DEV_ID": "placeholder"
 			},
             "queues": {
+                "producers": [
+                    {
+                        "queue": "search-run-queue",
+                        "binding": "SEARCH_RUN_QUEUE"
+                    }
+                ],
                 "consumers": [
                     {
-                        "queue": "search-processing-queue",
-                        "max_batch_size": 5,
-                        "max_batch_timeout": 10,
-                        "max_concurrency": 1
-
+                        "queue": "search-run-queue",
                     }
                 ]
+
             },
             "kv_namespaces": [
                 {
@@ -60,24 +75,28 @@
             ]
         }
 	},
-    "queues": {
-            "queues": {
+	"triggers": {
+		"crons": [
+			"*/15 * * * *"
+		]
+	},
+	"queues": {
+                "producers": [
+                    {
+                        "queue": "search-run-queue",
+                        "binding": "SEARCH_RUN_QUEUE"
+                    }
+                ],
                 "consumers": [
                     {
-                        "queue": "search-processing-queue",
-                        "max_batch_size": 5,
-                        "max_batch_timeout": 10,
-                        "max_concurrency": 1
-
+                        "queue": "search-run-queue",
                     }
                 ]
-            },
-    }, 
+	},
 	"kv_namespaces": [
 		{
 			"binding": "AUTH_TOKEN_KV",
 			"id": "fa93f7e7725a4eb4af55ff12b03ff810"
 		}
 	]
-   
 }
