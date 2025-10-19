@@ -35,7 +35,7 @@ export default {
             return new Response(JSON.stringify({ error: 'Failed to coordinate searches', details: error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
         }
     },
-    async queue(batch: MessageBatch<SearchMessage>, env: Env) {
+    async queue(batch: MessageBatch<SearchMessage>, env: Env, ctx: ExecutionContext) {
         // without access token, no searches will succeed
         const accessToken = parseAccessToken(await env.AUTH_TOKEN_KV.get(env.EBAY_KV_KEY, { type: 'json' }));
         if (!accessToken) {

@@ -1,4 +1,4 @@
-import { pgTable, boolean, integer, serial, varchar, decimal, jsonb, timestamp } from 'drizzle-orm/pg-core';
+import { pgTable, boolean, integer, serial, varchar, decimal, jsonb, timestamp, unique } from 'drizzle-orm/pg-core';
 
 export const item = pgTable('item', {
     id: serial('id').primaryKey(),
@@ -22,7 +22,10 @@ export const item = pgTable('item', {
     rawData: jsonb('raw_data'),
     discoveredAt: timestamp('discovered_at').defaultNow().notNull(),
     lastSeen: timestamp('last_seen').defaultNow().notNull(),
-});
+}, (table) => ({
+    earchExternalUnique: unique('item_search_external_unique')
+        .on(table.searchId, table.externalId),
+}));
 
 export const search = pgTable('search', {
     id: serial('id').primaryKey(),

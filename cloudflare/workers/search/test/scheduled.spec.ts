@@ -5,7 +5,7 @@ import {
     waitOnExecutionContext
 } from "cloudflare:test";
 import { expect, it, beforeEach, vi } from "vitest";
-import { getWorkerDb, search, closeWorkerDb } from "@db";
+import { getWorkerDb, search, closeWorkerDb, eq } from "@db";
 import worker from '../src/index'
 
 beforeEach(async () => {
@@ -17,10 +17,10 @@ beforeEach(async () => {
     vi.spyOn(env.SEARCH_RUN_QUEUE, "sendBatch").mockResolvedValue(undefined);
     await env.AUTH_TOKEN_KV.delete(env.EBAY_KV_KEY);
 });
-
 it("queues 1 search when it is found", async () => {
     // ARRANGE - Seed with drizzle
     const db = getWorkerDb(env.DATABASE_URL);
+
     const [inserted] = await db.insert(search).values({
         userId: 0,
         active: true,
@@ -30,7 +30,8 @@ it("queues 1 search when it is found", async () => {
         updatedAt: new Date(Date.now() - 2000000),
         lastRunAt: new Date(Date.now() - 1000000),
     }).returning({ search_id: search.id });
-
+    const verification = await db.select().from(search).where(eq(search.id, inserted.search_id));
+    console.log("Inserted and verified:", verification);
     await closeWorkerDb();
 
     // ACT - Call scheduled handler
@@ -45,6 +46,7 @@ it("queues 1 search when it is found", async () => {
     // ASSERT 
     expect(response.status).toBe(200);
     const result = await response.json() as any;
+    console.log(result);
     expect(result.searchesQueued).toBe(1);
     expect(env.SEARCH_RUN_QUEUE.sendBatch).toHaveBeenCalledWith([
         { body: { search_id: inserted.search_id } }

@@ -4,7 +4,7 @@ import { EbayItemSummary } from "@workers/shared";
 export type NewItem = typeof item.$inferInsert;
 export async function getSearchesToQueue(db: WorkerDb) {
     try {
-        return await db
+        const results = await db
             .select({ id: search.id })
             .from(search)
             .where(
@@ -19,6 +19,14 @@ export async function getSearchesToQueue(db: WorkerDb) {
                     )
                 )
             );
+
+        console.log(`getSearchesToQueue found ${results.length} searches`);
+
+        // Debug: check what's actually in the database
+        const all = await db.select().from(search);
+        console.log(`Total searches in DB: ${all.length}`, all);
+
+        return results;
     }
     catch (error: any) {
         console.error(`Error retrieving searches from database ${error}`);
@@ -35,19 +43,26 @@ export const createDbItemObjectFromSummaryHelper = (ebayItem: EbayItemSummary) =
         !ebayItem.itemWebUrl) {
         return null
     }
+    const toDate = (value: string | Date | undefined | null): Date | null => {
+        if (!value) return null;
+        if (value instanceof Date) return value;
+        if (typeof value === 'string') return new Date(value);
+        return null;
+    };
     return {
         externalId: ebayItem.itemId,
         title: ebayItem.title,
         priceValue: ebayItem.price.value,
-        priceCurrency: ebayItem.price.currency,
+        priceCurrency: ebayItem.price.currency || "USD",
         url: ebayItem.itemWebUrl,
-        primaryImageUrl: ebayItem.image?.imageUrl,
-        additionalImageUrls: ebayItem.additionalImages?.map(img => img.imageUrl!).filter(Boolean) as string[],
-        condition: ebayItem.condition, conditionId: ebayItem.conditionId,
-        buyingOptions: ebayItem.buyingOptions,
-        itemCreationDate: ebayItem.itemCreationDate ? new Date(ebayItem.itemCreationDate) : undefined,
-        itemEndDate: ebayItem.itemEndDate ? new Date(ebayItem.itemEndDate) : undefined,
-        sellerUsername: ebayItem.seller?.username,
+        primaryImageUrl: ebayItem.image?.imageUrl ?? null,
+        additionalImageUrls: ebayItem.additionalImages?.map(img => img.imageUrl) ?? null,
+        condition: ebayItem.condition ?? null,
+        conditionId: ebayItem.conditionId ?? null,
+        buyingOptions: ebayItem.buyingOptions ?? null,
+        itemCreationDate: ebayItem.itemCreationDate ? new Date(ebayItem.itemCreationDate) : null,
+        itemEndDate: ebayItem.itemEndDate ? new Date(ebayItem.itemEndDate) : null,
+        sellerUsername: ebayItem.seller?.username ?? null,
         rawData: ebayItem,
     };
 }
@@ -70,9 +85,16 @@ export const saveItemsAndUpdateSearch = async (db: WorkerDb, items: NewItem[], s
                     .where(eq(search.id, searchId));
             }
         )
-    } catch (error: any) {
+    }
+    catch (error: any) {
         console.error(`Error saving items for ${searchId} to database`);
-        throw (error);
+        console.error('Error details:', {
+            message: error.message,
+            code: error.code,
+            detail: error.detail,
+            stack: error.stack
+        });
+        throw error;
     }
 }
 
