@@ -17,6 +17,7 @@ beforeEach(async () => {
     vi.spyOn(env.SEARCH_RUN_QUEUE, "sendBatch").mockResolvedValue(undefined);
     await env.AUTH_TOKEN_KV.delete(env.EBAY_KV_KEY);
 });
+
 it("queues 1 search when it is found", async () => {
     // ARRANGE - Seed with drizzle
     const db = getWorkerDb(env.DATABASE_URL);
