@@ -21,5 +21,6 @@ export {
     between,
     sql,
     exists,
+    desc,
     type SQL,
 } from "drizzle-orm";
