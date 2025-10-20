@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
     /* config options here */
     transpilePackages: ["@db"],
     images: {
-        domains: ['i.ebayimg.com'],
+        domains: ['i.ebayimg.com', 'i.ebayimg.sandbox.ebay.com'],
     }
 };
 
