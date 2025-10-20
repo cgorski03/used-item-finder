@@ -38,6 +38,56 @@ afterEach(() => {
     fetchMock.assertNoPendingInterceptors();
 });
 
+it("successfully processes a batch with a single search", async () => {
+    // ARRANGE - Seed database
+    const db = getWorkerDb(env.DATABASE_URL);
+    const [insertedSearch] = await db
+        .insert(search)
+        .values({
+            userId: 1,
+            active: true,
+            keywords: "blue shirt",
+            pollIntervalMinutes: 15,
+            createdAt: new Date(Date.now() - 2000000),
+            updatedAt: new Date(Date.now() - 2000000),
+            lastRunAt: new Date(Date.now() - 1000000),
+        })
+        .returning({ search_id: search.id });
+
+    await closeWorkerDb();
+
+    // Create message batch
+    const batch = createMessageBatch("SEARCH_RUN_QUEUE", [
+        {
+            id: "msg-1",
+            timestamp: new Date(),
+            body: { search_id: insertedSearch.search_id },
+            attempts: 1
+        },
+    ]);
+
+    // ACT - Call queue handler directly
+    const ctx = createExecutionContext();
+    const result = await worker.queue(batch as MessageBatch<SearchMessage>, env, ctx);
+    await getQueueResult(batch, ctx);
+
+    // ASSERT
+    expect(result.success).toBe(true);
+
+    // Verify items were saved
+    const db2 = getWorkerDb(env.DATABASE_URL);
+    const savedItems = await db2
+        .select()
+        .from(item)
+        .where(eq(item.searchId, insertedSearch.search_id));
+
+    await closeWorkerDb();
+
+    expect(savedItems).toHaveLength(4);
+    expect(savedItems[0].title).toBe("Vintage Red Baseball Cap - New Era");
+    expect(savedItems[1].title).toBe("Nike Running Shoes Size 10 - Gently Used");
+});
+
 it("processes multiple searches in a batch", async () => {
     // ARRANGE
     const db = getWorkerDb(env.DATABASE_URL);

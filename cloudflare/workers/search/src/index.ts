@@ -4,7 +4,7 @@ import { EbayAuthTokenOptions, EbayItemSummary, parseAccessToken, searchEbay, Se
 import { createDbItemObjectFromSummaryHelper, getSearchesToQueue, getSearchObjects, NewItem, saveItemsAndUpdateSearch } from "./repository";
 
 export default {
-    async scheduled(controller: ScheduledController, env: Env, ctx: ExecutionContext): Promise<Response> {
+    async scheduled(controller: ScheduledController, env: Env, ctx: ExecutionContext) {
         const db = getWorkerDb(env.DATABASE_URL);
         try {
             const ebayOptions: EbayAuthTokenOptions = {
@@ -25,14 +25,14 @@ export default {
                 await env.SEARCH_RUN_QUEUE.sendBatch(messagesToSend);
                 console.log(`Queued ${messagesToSend.length} search jobs to Cloudflare Queue.`);
             }
-            return new Response(JSON.stringify({
+            return {
                 success: true,
                 searchesQueued: searchesToQueue.length,
-            }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+            };
         }
         catch (error: any) {
             console.error('coordinator worker has failed' + error);
-            return new Response(JSON.stringify({ error: 'Failed to coordinate searches', details: error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+            throw (error);
         }
     },
     async queue(batch: MessageBatch<SearchMessage>, env: Env, ctx: ExecutionContext) {
@@ -62,7 +62,7 @@ export default {
                     return { ...itemObj, searchId: search.id } as NewItem;
                 }
             }).filter((it) => it != null);
-            saveItemsAndUpdateSearch(db, items, search.id)
+            await saveItemsAndUpdateSearch(db, items, search.id)
         }));
         return {
             success: true

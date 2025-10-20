@@ -72,6 +72,7 @@ export const getSearchObjects = async (db: WorkerDb, ids: number[]) => {
 
 export const saveItemsAndUpdateSearch = async (db: WorkerDb, items: NewItem[], searchId: number) => {
     try {
+        console.log(`saving ${items}`);
         await db.transaction(
             async (tx) => {
                 await tx.insert(item).values(items)

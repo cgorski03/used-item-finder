@@ -34,7 +34,7 @@ declare module 'ebay-oauth-nodejs-client' {
         getApplicationToken(
             environment: EbayEnv,
             scopes?: string | string[]
-        ): Promise<AccessTokenResponse>;
+        ): Promise<string>;
 
         /**
          * Generates a user consent authorization URL.

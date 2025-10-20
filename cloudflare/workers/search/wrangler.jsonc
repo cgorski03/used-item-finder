@@ -16,7 +16,7 @@
 	"env": {
 		"dev": {
 			"vars": {
-				"DATABASE_URL": "postgres://colin:secure_password@localhost:5432/itemfinder_test",
+				"DATABASE_URL": "postgres://colin:secure_password@localhost:5432/itemfinder",
 				"EBAY_KV_KEY": "EBAY_AUTH",
 				"EBAY_ENV": "SANDBOX",
                 "EBAY_CLIENT_ID": "placeholder",

@@ -1,5 +1,6 @@
 import EbayAuthToken, { AccessTokenResponse, EbayAuthTokenOptions, EbayEnv } from 'ebay-oauth-nodejs-client';
 import type { components, operations } from '../types/ebay';
+import { AccessTokenKVObject } from './ebay-tokens';
 
 export type EbayItemSummary = components['schemas']['ItemSummary'];
 export type EbaySearchQuery = operations['search']['parameters']['query'];
@@ -29,7 +30,7 @@ const getEbaySearchHeaders = (token: string) => ({
 
 export const getAccessToken = async (options: EbayAuthTokenOptions): Promise<AccessTokenResponse> => {
     const token = new EbayAuthToken(options)
-    return await token.getApplicationToken(options.env);
+    return JSON.parse(await token.getApplicationToken(options.env));
 }
 
 export async function searchEbay(keywords: string, accessToken: string, ebayEnv: EbayEnv): Promise<EbayItemSummary[]> {
