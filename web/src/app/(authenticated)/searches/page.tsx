@@ -1,7 +1,6 @@
 "use client"
 import React from 'react'
 import { trpc } from '@/trpc/react'
-import { SearchList } from '@/trpc/shared';
 import { SearchCard } from './components/searchCard';
 
 export default function SearchesGrid() {
