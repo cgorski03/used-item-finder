@@ -1,77 +1,84 @@
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import Link from 'next/link';
-import Image from 'next/image';
-import { ExternalLink, Tag } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { ItemList } from '@/trpc/shared';
+import {
+    Card,
+    CardHeader,
+    CardTitle,
+    CardContent,
+    CardFooter,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
+import Image from "next/image";
+import { ExternalLink } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { ItemList } from "@/trpc/shared";
 
 interface ItemCardProps {
     item: ItemList[number];
 }
 
 export function ItemCard({ item }: ItemCardProps) {
-    // Format price
     if (!item) {
-        return <div>Error Loading Item</div>
+        return <div>Error Loading Item</div>;
     }
-    const formattedPrice = new Intl.NumberFormat('en-US', { // Adjust locale as needed
-        style: 'currency',
+
+    const formattedPrice = new Intl.NumberFormat("en-US", {
+        style: "currency",
         currency: item.priceCurrency,
     }).format(parseFloat(item.priceValue));
 
-    const conditionDisplay = item.condition ? item.condition : 'N/A';
-
+    const conditionDisplay = item.condition ? item.condition : "N/A";
+    console.log(item);
     return (
-        <Card className={cn("w-[320px] overflow-hidden flex flex-col")}>
+        <Card
+            className={cn(
+                "w-[340px] overflow-hidden flex flex-col h-[520px] hover:shadow-lg transition-shadow"
+            )}
+        >
             {/* Item Image */}
             <CardHeader className="p-0">
-                {item.primaryImageUrl ? (
-                    <div className="relative h-48 w-full bg-muted-foreground/20 overflow-hidden">
-                        <Image
-                            src={item.primaryImageUrl}
-                            alt={item.title || "Item image"}
-                            width={200}
-                            height={200}
-                            className="object-cover mx-auto transition-transform duration-300 hover:scale-105"
-                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                            priority // For the first few items, consider loading them faster
-                        />
-                    </div>
-                ) : (
-                    <div className="h-48 w-full flex items-center justify-center bg-gray-200 text-gray-500">
-                        No Image
-                    </div>
-                )}
+                <div className="relative h-64 w-full bg-muted overflow-hidden">
+                    <Image
+                        src={item.primaryImageUrl ?? ""}
+                        alt={item.title || "Item image"}
+                        width={200}
+                        height={300}
+                        className="object-cover transition-transform duration-300 hover:scale-105"
+                        sizes="340px"
+                    />
+                </div>
             </CardHeader>
 
             {/* Item Details */}
-            <CardContent className="flex-1 p-4 space-y-2">
-                <CardTitle className="text-lg font-semibold line-clamp-2 min-h-[56px]">
-                    {item.title}
-                </CardTitle>
-                <CardDescription>
-                    <span className="text-xl font-bold text-primary">{formattedPrice}</span>
-                </CardDescription>
+            <CardContent className="flex-1 p-6 space-y-4">
+                <div className="space-y-3">
+                    <CardTitle className="text-base font-medium line-clamp-2 leading-snug min-h-[44px]">
+                        {item.title}
+                    </CardTitle>
 
-                <div className="flex items-center text-sm text-muted-foreground">
-                    <Tag className="h-4 w-4 mr-1" />
-                    <span>Condition: {conditionDisplay}</span>
+                    <div className="flex items-baseline justify-between">
+                        <span className="text-2xl font-semibold">{formattedPrice}</span>
+                        <Badge variant="secondary" className="text-xs">
+                            {conditionDisplay}
+                        </Badge>
+                    </div>
                 </div>
 
                 {item.sellerUsername && (
-                    <div className="text-sm text-muted-foreground">
-                        Seller: <span className="font-medium text-foreground">{item.sellerUsername}</span>
+                    <div className="pt-3 border-t">
+                        <p className="text-xs text-muted-foreground">
+                            {item.sellerUsername}
+                        </p>
                     </div>
                 )}
             </CardContent>
 
             {/* Actions */}
-            <CardFooter className="p-4 pt-0">
-                <Button asChild className="w-full">
+            <CardFooter className="p-6 pt-0">
+                <Button asChild variant="outline" className="w-full" size="sm">
                     <Link href={item.url} target="_blank" rel="noopener noreferrer">
-                        View Item
-                        <ExternalLink className="ml-2 h-4 w-4" />
+                        View Listing
+                        <ExternalLink className="ml-2 h-3.5 w-3.5" />
                     </Link>
                 </Button>
             </CardFooter>
