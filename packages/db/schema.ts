@@ -9,8 +9,8 @@ export const item = pgTable('item', {
     title: varchar('title', { length: 500 }).notNull(),
     priceValue: decimal('price_value', { precision: 10, scale: 2 }).notNull(), // Store value and currency separately
     priceCurrency: varchar('price_currency', { length: 3 }).notNull(),
-    url: varchar('url', { length: 500 }).notNull(),
-    primaryImageUrl: varchar('primary_image_url', { length: 500 }), // The main image
+    url: varchar('url', { length: 1000 }).notNull(),
+    primaryImageUrl: varchar('primary_image_url', { length: 1000 }), // The main image
     additionalImageUrls: jsonb('additional_image_urls').$type<string[]>(), // Array of other images
     condition: varchar('condition', { length: 50 }),
     conditionId: varchar('condition_id', { length: 10 }),
@@ -33,8 +33,22 @@ export const search = pgTable('search', {
     active: boolean('active').notNull(),
     // Comma separated list of keywords
     keywords: varchar('keywords', { length: 500 }).notNull(),
+    title: varchar('title', { length: 50 }).notNull(),
+    aiEnabled: boolean('ai_enabled').notNull(),
+    detailedRequirements: varchar('detailed_requirements', { length: 1000 }),
     pollIntervalMinutes: integer('poll_interval_minutes').notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
     lastRunAt: timestamp('last_run_at'),
 });
+/*
+export const userSavedItem = pgTable('userSavedItem', {
+    id: serial('id').primaryKey(),
+    userId: integer('user_id').notNull(),
+    savedAt: timestamp('saved_at').defaultNow().notNull(),
+    // Actual saved item composite key - needs a external id and searchId
+    externalId: varchar('external_id', { length: 100 }).notNull(),
+    // Id of the search that found it 
+    searchId: integer('search_id').notNull(),
+});
+*/
