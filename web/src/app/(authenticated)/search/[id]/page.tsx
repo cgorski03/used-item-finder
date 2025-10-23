@@ -27,9 +27,9 @@ export default function SearchItemsPage({ params }: { params: Promise<{ id: stri
     const { data: items, isLoading, isError, error } = trpc.item.getBySearchId.useQuery({ searchId: searchId })
 
     return (
-        <div className="w-full h-full p-4"> {/* Added padding for better aesthetics */}
+        <div className="w-full p-4">
             <h1 className="text-2xl font-bold mb-6">Saved Items</h1>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 xxl:grid-cols-6">
                 {items && items.map((item: ItemList[number]) => (
                     <ItemCard key={item.id} item={item} />
                 ))}

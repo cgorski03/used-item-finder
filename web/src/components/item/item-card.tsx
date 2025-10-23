@@ -32,7 +32,7 @@ export function ItemCard({ item }: ItemCardProps) {
     return (
         <Card
             className={cn(
-                "w-[340px] overflow-hidden flex flex-col h-[520px] hover:shadow-lg transition-shadow"
+                "flex flex-col h-[420px] hover:shadow-lg transition-shadow"
             )}
         >
             {/* Item Image */}
@@ -41,40 +41,31 @@ export function ItemCard({ item }: ItemCardProps) {
                     <Image
                         src={item.primaryImageUrl ?? ""}
                         alt={item.title || "Item image"}
-                        width={200}
-                        height={300}
-                        className="object-cover transition-transform duration-300 hover:scale-105"
+                        fill
+                        className="object-cover transition-transform duration-300 "
                         sizes="340px"
                     />
                 </div>
             </CardHeader>
 
             {/* Item Details */}
-            <CardContent className="flex-1 p-6 space-y-4">
-                <div className="space-y-3">
-                    <CardTitle className="text-base font-medium line-clamp-2 leading-snug min-h-[44px]">
+            <CardContent className="flex-1 p-4 flex flex-col justify-end pb-2">
+                <div className="space-y-2">
+                    <CardTitle className="text-sm font-medium line-clamp-2 leading-tight">
                         {item.title}
                     </CardTitle>
 
                     <div className="flex items-baseline justify-between">
-                        <span className="text-2xl font-semibold">{formattedPrice}</span>
+                        <span className="text-lg font-semibold">{formattedPrice}</span>
                         <Badge variant="secondary" className="text-xs">
                             {conditionDisplay}
                         </Badge>
                     </div>
                 </div>
-
-                {item.sellerUsername && (
-                    <div className="pt-3 border-t">
-                        <p className="text-xs text-muted-foreground">
-                            {item.sellerUsername}
-                        </p>
-                    </div>
-                )}
             </CardContent>
 
             {/* Actions */}
-            <CardFooter className="p-6 pt-0">
+            <CardFooter className="p-4 pt-0">
                 <Button asChild variant="outline" className="w-full" size="sm">
                     <Link href={item.url} target="_blank" rel="noopener noreferrer">
                         View Listing
