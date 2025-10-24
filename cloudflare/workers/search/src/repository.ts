@@ -1,7 +1,9 @@
-import { WorkerDb, search, item, and, eq, isNull, lte, or, sql, inArray } from "@db";
+import { WorkerDb, search, item, and, eq, isNull, lte, or, sql, inArray, itemAiInsight, itemAiAnalysisInsert } from "@db";
 import { EbayItemSummary } from "@workers/shared";
+import { ModelScoreResponse } from "./ai/system";
 
 export type NewItem = typeof item.$inferInsert;
+
 export async function getSearchesToQueue(db: WorkerDb) {
     try {
         const results = await db
@@ -99,3 +101,35 @@ export const saveItemsAndUpdateSearch = async (db: WorkerDb, items: NewItem[], s
     }
 }
 
+export const getItemSearchObjects = async (db: WorkerDb, itemIds: number[]) => {
+    try {
+
+        return await db.select().from(item)
+            .leftJoin(search, eq(item.searchId, search.id))
+            .where(inArray(item.id, itemIds));
+    } catch (error: any) {
+        console.error('Error getting item search objects. Details:', {
+            message: error.message,
+            code: error.code,
+            detail: error.detail,
+            stack: error.stack
+        });
+        throw error;
+    }
+}
+export const saveItemBasicScore = async (db: WorkerDb, item: itemAiAnalysisInsert) => {
+    try {
+        await db.insert(itemAiInsight).values(item);
+    }
+    catch (error: any) {
+        console.error(`Error analysis for search ${item.searchId} ${item.searchItemId} to database`);
+        console.error('Error details:', {
+            message: error.message,
+            code: error.code,
+            detail: error.detail,
+            stack: error.stack
+        });
+        throw error;
+    }
+
+}

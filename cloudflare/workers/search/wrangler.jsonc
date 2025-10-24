@@ -11,28 +11,37 @@
 		"EBAY_CLIENT_ID": "placeholder",
 		"EBAY_CLIENT_SECRET": "placeholder",
 		"EBAY_DEV_ID": "placeholder",
-		"EBAY_ENV": "SANDBOX"
+		"EBAY_ENV": "SANDBOX",
+        "GOOGLE_API_KEY": "placeholder"
 	},
 	"env": {
 		"dev": {
 			"vars": {
 				"DATABASE_URL": "postgres://colin:secure_password@localhost:5432/itemfinder",
 				"EBAY_KV_KEY": "EBAY_AUTH",
-				"EBAY_ENV": "SANDBOX",
+				"EBAY_ENV": "PRODUCTION",
                 "EBAY_CLIENT_ID": "placeholder",
                 "EBAY_CLIENT_SECRET": "placeholder",
-                "EBAY_DEV_ID": "placeholder"
+                "EBAY_DEV_ID": "placeholder",
+        "GOOGLE_API_KEY": "placeholder"
 			},
             "queues": {
                 "producers": [
                     {
                         "queue": "search-run-queue",
                         "binding": "SEARCH_RUN_QUEUE"
+                    },
+                    {
+                        "queue": "ai-analysis-queue",
+                        "binding": "AI_ANALYSIS_QUEUE"
                     }
                 ],
                 "consumers": [
                     {
                         "queue": "search-run-queue",
+                    },
+                    {
+                        "queue": "ai-analysis-queue",
                     }
                 ]
 
@@ -51,18 +60,26 @@
 				"EBAY_ENV": "SANDBOX",
                 "EBAY_CLIENT_ID": "placeholder",
                 "EBAY_CLIENT_SECRET": "placeholder",
-                "EBAY_DEV_ID": "placeholder"
+                "EBAY_DEV_ID": "placeholder",
+                "GOOGLE_API_KEY": "placeholder"
 			},
             "queues": {
                 "producers": [
                     {
                         "queue": "search-run-queue",
                         "binding": "SEARCH_RUN_QUEUE"
+                    },
+                    {
+                        "queue": "ai-analysis-queue",
+                        "binding": "AI_ANALYSIS_QUEUE"
                     }
                 ],
                 "consumers": [
                     {
                         "queue": "search-run-queue",
+                    },
+                    {
+                        "queue": "ai-analysis-queue",
                     }
                 ]
 
@@ -85,11 +102,18 @@
                     {
                         "queue": "search-run-queue",
                         "binding": "SEARCH_RUN_QUEUE"
+                    },
+                    {
+                        "queue": "ai-analysis-queue",
+                        "binding": "AI_ANALYSIS_QUEUE"
                     }
                 ],
                 "consumers": [
                     {
                         "queue": "search-run-queue",
+                    },
+                    {
+                        "queue": "ai-analysis-queue",
                     }
                 ]
 	},

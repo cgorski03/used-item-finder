@@ -18,7 +18,6 @@ export const item = pgTable('item', {
     itemCreationDate: timestamp('item_creation_date'),
     itemEndDate: timestamp('item_end_date'),
     sellerUsername: varchar('seller_username', { length: 100 }), // From seller.username
-    // Store the raw JSON if you want full flexibility without parsing everything
     rawData: jsonb('raw_data'),
     discoveredAt: timestamp('discovered_at').defaultNow().notNull(),
     lastSeen: timestamp('last_seen').defaultNow().notNull(),
@@ -26,6 +25,28 @@ export const item = pgTable('item', {
     earchExternalUnique: unique('item_search_external_unique')
         .on(table.searchId, table.externalId),
 }));
+
+export type itemSelect = typeof item.$inferSelect;
+export type itemInsert = typeof item.$inferInsert;
+
+export const itemAiAnalysis = pgTable('item_ai_analysis', {
+    id: serial('id').primaryKey(),
+    searchId: integer('search_id').notNull(),
+    // External ID the item analysis belongs to 
+    searchItemId: varchar('external_id', { length: 100 }).notNull(),
+    // combination, only one the user will see
+    score: integer('score').notNull(),
+    // score that all items will have 
+    // simple basedo n basic attributes - title price text based etc
+    attributesScore: integer('attributes_score').notNull(),
+    attributesReasoning: varchar('attributes_reasoning', { length: 600 }).notNull(),
+    imageScore: integer('score'),
+    imageReasoning: varchar('reasoning', { length: 600 }),
+    analyzedAt: timestamp('analyzed_at').defaultNow().notNull(),
+});
+
+export type itemAiAnalysisSelect = typeof itemAiAnalysis.$inferSelect;
+export type itemAiAnalysisInsert = typeof itemAiAnalysis.$inferInsert;
 
 export const search = pgTable('search', {
     id: serial('id').primaryKey(),
@@ -41,6 +62,9 @@ export const search = pgTable('search', {
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
     lastRunAt: timestamp('last_run_at'),
 });
+
+export type searchSelect = typeof search.$inferSelect;
+export type searchInsert = typeof search.$inferInsert;
 /*
 export const userSavedItem = pgTable('userSavedItem', {
     id: serial('id').primaryKey(),
