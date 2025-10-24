@@ -1,7 +1,7 @@
 "use client"
 import React from 'react'
 import { trpc } from '@/trpc/react'
-import { SearchCard } from './components/searchCard';
+import { SearchCard } from './components/search-card';
 
 export default function SearchesGrid() {
     const { data: searches, isLoading, isError, error } =
