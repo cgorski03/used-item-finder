@@ -81,7 +81,7 @@ export function SearchCard({ search }: SearchCardProps) {
 
             <CardFooter className="flex gap-2 pt-0">
                 <Button variant="outline" className="flex-1" asChild>
-                    <Link href={`/search/${search.id}`}>View Items</Link>
+                    <Link href={`/searches/${search.id}`}>View Items</Link>
                 </Button>
                 <Button variant="ghost" size="icon">
                     {search.active ? (

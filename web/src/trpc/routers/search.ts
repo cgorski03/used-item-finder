@@ -1,20 +1,30 @@
 import { z } from 'zod';
-import { router, publicProcedure } from '../init';
-import { desc, eq, search } from '@db'
+import { router, protectedProcedure } from '../init';
+import { eq, search, and } from '@db'
 
 export const searchRouter = router({
-    getUserSearches: publicProcedure
+    getSearchById: protectedProcedure
         .input(z.object({
-            userId: z.number(),
+            id: z.number()
         })
         ).query(async ({ ctx, input }) => {
-            const userId = input.userId;
+            const userId = ctx.userId;
+            const res = await (await ctx.db).select()
+                .from(search)
+                .where(and(eq(search.userId, userId), eq(search.id, input.id)));
+            const searchObj = res[0] ?? null;
+            if (!searchObj) throw new Error("Not Found");
+            return searchObj;
+        }),
+    getUserSearches: protectedProcedure
+        .query(async ({ ctx }) => {
+            const userId = ctx.userId;
             const allItems = (await ctx.db).select()
                 .from(search)
                 .where(eq(search.userId, userId));
             return allItems;
         }),
-    createSearch: publicProcedure
+    createSearch: protectedProcedure
         .input(
             z.object({
                 keywords: z.string().max(500),
@@ -28,8 +38,8 @@ export const searchRouter = router({
             const [insertedSearch] = await (await ctx.db)
                 .insert(search)
                 .values({
-                    // replace with ctx.userId after auth
-                    userId: 0,
+                    // TODO replace with ctx.userId after auth
+                    userId: ctx.userId,
                     keywords: input.keywords,
                     title: input.title,
                     aiEnabled: input.aiEnabled,

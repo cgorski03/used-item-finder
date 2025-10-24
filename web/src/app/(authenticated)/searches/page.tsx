@@ -5,7 +5,7 @@ import { SearchCard } from './components/search-card';
 
 export default function SearchesGrid() {
     const { data: searches, isLoading, isError, error } =
-        trpc.search.getUserSearches.useQuery({ userId: 0 });
+        trpc.search.getUserSearches.useQuery();
 
     if (isLoading) return <div className="p-4">Loading...</div>;
     if (isError) return <div className="p-4 text-red-600">{error.message}</div>;

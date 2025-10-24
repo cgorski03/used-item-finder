@@ -20,7 +20,21 @@ export const router = t.router;
 export const createCallerFactory = t.createCallerFactory;
 export const baseProcedure = t.procedure;
 
+export const protectedProcedure = t.procedure.use(async ({ ctx, next }) => {
+    // I don't have auth setup yet but I want to be able to basically mock this for now
+    if (process.env.NODE_ENV !== "development") {
+        throw new Error("Something is wrong")
+    }
+
+    return next({
+        ctx: {
+            ...ctx,
+            session: "flkjjlfs",
+            userId: 0,
+        },
+    });
+});
+
 export const publicProcedure = baseProcedure.use(async (opts) => {
-    console.log("-> Public procedure called:", opts.path);
     return opts.next();
 });
