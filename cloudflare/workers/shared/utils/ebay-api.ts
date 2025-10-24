@@ -37,7 +37,7 @@ export async function searchEbay(keywords: string, accessToken: string, ebayEnv:
     const endpoint = getBaseUrl(ebayEnv);
     const queryParams: EbaySearchQuery = {
         q: keywords,
-        limit: "50",
+        limit: "5",
         offset: "0"
     };
     const searchParams = getUrlSearchParams(queryParams);

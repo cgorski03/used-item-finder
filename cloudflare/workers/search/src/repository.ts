@@ -1,6 +1,5 @@
-import { WorkerDb, search, item, and, eq, isNull, lte, or, sql, inArray, itemAiInsight, itemAiAnalysisInsert } from "@db";
+import { WorkerDb, search, item, and, eq, isNull, lte, or, sql, inArray, itemAiAnalysisInsert, itemAiAnalysis } from "@db";
 import { EbayItemSummary } from "@workers/shared";
-import { ModelScoreResponse } from "./ai/system";
 
 export type NewItem = typeof item.$inferInsert;
 
@@ -72,38 +71,65 @@ export const getSearchObjects = async (db: WorkerDb, ids: number[]) => {
     return await db.select().from(search).where(inArray(search.id, ids));
 }
 
-export const saveItemsAndUpdateSearch = async (db: WorkerDb, items: NewItem[], searchId: number) => {
+export const saveItemsAndUpdateSearch = async (
+    db: WorkerDb,
+    items: NewItem[],
+    searchId: number
+): Promise<NewItem[]> => {
     try {
-        console.log(`saving ${items}`);
-        await db.transaction(
-            async (tx) => {
-                await tx.insert(item).values(items)
-                    .onConflictDoUpdate({
-                        target: [item.searchId, item.externalId],
-                        set: { lastSeen: new Date() }
-                    });
-                await tx.update(search).set({
-                    lastRunAt: new Date(),
+        console.log(`saving ${items.length} items`);
+
+        const newItems = await db.transaction(async (tx) => {
+            const insertTime = new Date();
+
+            // Explicitly set discoveredAt for all items
+            const itemsWithTimestamp = items.map((i) => ({
+                ...i,
+                discoveredAt: insertTime,
+            }));
+
+            const insertedRows = await tx
+                .insert(item)
+                .values(itemsWithTimestamp)
+                .onConflictDoUpdate({
+                    target: [item.searchId, item.externalId],
+                    set: {
+                        lastSeen: new Date(),
+                        // DON'T update discoveredAt on conflict
+                    },
                 })
-                    .where(eq(search.id, searchId));
-            }
-        )
-    }
-    catch (error: any) {
+                .returning();
+
+            // New items have discoveredAt === insertTime
+            const newItemsFromInsert = insertedRows.filter(
+                (row) => row.discoveredAt.getTime() === insertTime.getTime()
+            );
+
+            await tx
+                .update(search)
+                .set({ lastRunAt: new Date() })
+                .where(eq(search.id, searchId));
+
+            return newItemsFromInsert;
+        });
+
+        return newItems;
+    } catch (error: any) {
         console.error(`Error saving items for ${searchId} to database`);
         console.error('Error details:', {
             message: error.message,
             code: error.code,
             detail: error.detail,
-            stack: error.stack
+            stack: error.stack,
         });
         throw error;
     }
-}
+};
 
 export const getItemSearchObjects = async (db: WorkerDb, itemIds: number[]) => {
     try {
 
+        console.log(itemIds);
         return await db.select().from(item)
             .leftJoin(search, eq(item.searchId, search.id))
             .where(inArray(item.id, itemIds));
@@ -119,7 +145,7 @@ export const getItemSearchObjects = async (db: WorkerDb, itemIds: number[]) => {
 }
 export const saveItemBasicScore = async (db: WorkerDb, item: itemAiAnalysisInsert) => {
     try {
-        await db.insert(itemAiInsight).values(item);
+        await db.insert(itemAiAnalysis).values(item);
     }
     catch (error: any) {
         console.error(`Error analysis for search ${item.searchId} ${item.searchItemId} to database`);

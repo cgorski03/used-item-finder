@@ -35,15 +35,18 @@ const getScore = async (ai: GoogleGenerativeAIProvider, item: itemSelect, search
     return result;
     // Save this score to the database
 }
+
 export async function analyzeItem(api_key: string, item: itemSelect, search: searchSelect) {
     // ensure the properties exist
-    if (!item || !search) {
-        console.error('search or item does not exist?');
-        return;
-    }
     // do quick check on ebay item titel
     const ai = google(api_key);
-    const score = getScore(ai, item, search);
+    const basicRes = await getScore(ai, item, search);
+    return {
+        ...basicRes,
+        // this is a placeholder for when i will actually have these attributes
+        imageScore: null,
+        imageReasoning: null
+    }
     //TODO this will get skipped on a score test after phase 2
     // if above basic threshold, do image analysis and add scoring to db
     // if not, add basic score attirbute

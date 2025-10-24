@@ -1,6 +1,6 @@
 import { closeWorkerDb, getWorkerDb, } from "@db";
 import { setEbayToken } from "./ebay-token-utils";
-import { EbayAuthTokenOptions, SearchMessage } from "@workers/shared";
+import { AiAnalysisMessage, EbayAuthTokenOptions, SearchMessage } from "@workers/shared";
 import { handleAiAnalysisRequest, handleSearchRequest } from "./queue-handlers";
 import { getSearchesToQueue } from "./repository";
 
@@ -36,12 +36,13 @@ export default {
             throw (error);
         }
     },
-    async queue(batch: MessageBatch<SearchMessage>, env: Env, ctx: ExecutionContext) {
+    async queue(batch: MessageBatch<AiAnalysisMessage> | MessageBatch<SearchMessage>, env: Env, ctx: ExecutionContext) {
         switch (batch.queue) {
             case 'ai-analysis-queue':
-                handleAiAnalysisRequest(batch, env, ctx);
+                await handleAiAnalysisRequest(batch as MessageBatch<AiAnalysisMessage>, env, ctx);
             case 'search-run-queue':
-                handleSearchRequest(batch, env, ctx);
+                console.log('receieved by search quueeu');
+                await handleSearchRequest(batch as MessageBatch<SearchMessage>, env, ctx);
         }
     }
 }
