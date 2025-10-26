@@ -128,11 +128,12 @@ export const saveItemsAndUpdateSearch = async (
 
 export const getItemSearchObjects = async (db: WorkerDb, itemIds: number[]) => {
     try {
-
-        console.log(itemIds);
-        return await db.select().from(item)
+        const query = db.select().from(item)
             .leftJoin(search, eq(item.searchId, search.id))
-            .where(inArray(item.id, itemIds));
+            .where(inArray(item.id, itemIds))
+            .prepare('no_cache');
+
+        return await query.execute();
     } catch (error: any) {
         console.error('Error getting item search objects. Details:', {
             message: error.message,
@@ -143,6 +144,7 @@ export const getItemSearchObjects = async (db: WorkerDb, itemIds: number[]) => {
         throw error;
     }
 }
+
 export const saveItemBasicScore = async (db: WorkerDb, item: itemAiAnalysisInsert) => {
     try {
         await db.insert(itemAiAnalysis).values(item);

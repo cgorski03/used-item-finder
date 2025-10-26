@@ -40,9 +40,10 @@ export default {
         switch (batch.queue) {
             case 'ai-analysis-queue':
                 await handleAiAnalysisRequest(batch as MessageBatch<AiAnalysisMessage>, env, ctx);
+                break;
             case 'search-run-queue':
-                console.log('receieved by search quueeu');
                 await handleSearchRequest(batch as MessageBatch<SearchMessage>, env, ctx);
+                break;
         }
     }
 }

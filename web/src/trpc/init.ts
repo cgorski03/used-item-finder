@@ -22,6 +22,7 @@ export const baseProcedure = t.procedure;
 
 export const protectedProcedure = t.procedure.use(async ({ ctx, next }) => {
     // I don't have auth setup yet but I want to be able to basically mock this for now
+    // This shoudl be a getUserSession call
     if (process.env.NODE_ENV !== "development") {
         throw new Error("Something is wrong")
     }

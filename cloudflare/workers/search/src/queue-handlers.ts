@@ -5,6 +5,7 @@ import { analyzeItem } from "./ai/analyze-item";
 
 export async function handleSearchRequest(batch: MessageBatch<SearchMessage>, env: Env, ctx: ExecutionContext) {
     // without access token, no searches will succeed
+    console.log(`Handling search batch: ${batch.messages}`);
     const accessToken = parseAccessToken(await env.AUTH_TOKEN_KV.get(env.EBAY_KV_KEY, { type: 'json' }));
     if (!accessToken) {
         throw new Error('No access token');
@@ -35,7 +36,9 @@ export async function handleSearchRequest(batch: MessageBatch<SearchMessage>, en
             .map((row) => ({
                 body: { item_id: row.id },
             }));
-        await env.AI_ANALYSIS_QUEUE.sendBatch(newIds);
+        if (newIds.length !== 0) {
+            await env.AI_ANALYSIS_QUEUE.sendBatch(newIds);
+        }
     }));
     return {
         success: true
@@ -43,10 +46,12 @@ export async function handleSearchRequest(batch: MessageBatch<SearchMessage>, en
 }
 
 export async function handleAiAnalysisRequest(batch: MessageBatch<AiAnalysisMessage>, env: Env, ctx: ExecutionContext) {
+    console.log(`Handling AI Analysis request batch: ${batch.messages}`);
     const itemIds = batch.messages.map((message) => {
         return message.body.item_id
     });
     const db = getWorkerDb(env.DATABASE_URL);
+    console.log("Pre: " + itemIds);
     const itemSearchObjects = await getItemSearchObjects(db, itemIds);
     if (itemSearchObjects.length === 0) { throw new Error("No items to analyze"); }
     try {

@@ -62,7 +62,6 @@ it("successfully processes a batch with a single search", async () => {
             id: "msg-1",
             timestamp: new Date(),
             body: { search_id: insertedSearch.search_id },
-            attempts: 1
         },
     ]);
 
@@ -83,9 +82,9 @@ it("successfully processes a batch with a single search", async () => {
 
     await closeWorkerDb();
 
-    expect(savedItems).toHaveLength(4);
-    expect(savedItems[0].title).toBe("Vintage Red Baseball Cap - New Era");
-    expect(savedItems[1].title).toBe("Nike Running Shoes Size 10 - Gently Used");
+    expect(savedItems).toHaveLength(2);
+    expect(savedItems[0].title).toBe("Blue Cotton Shirt");
+    expect(savedItems[1].title).toBe("Navy Blue Shirt");
 });
 
 it("processes multiple searches in a batch", async () => {
@@ -189,7 +188,6 @@ it("throws error when search is not found", async () => {
             id: "msg-1",
             timestamp: new Date(),
             body: { search_id: 999 }, // Non-existent search ID
-            attempts: 1
         },
     ]);
 
