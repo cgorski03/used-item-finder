@@ -11,13 +11,15 @@ import Link from "next/link";
 import Image from "next/image";
 import { ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ItemList } from "@/trpc/shared";
+import { ItemListDto } from "@/trpc/shared";
+import { itemAiAnalysisSelect, itemSelect } from "@db";
 
 interface ItemCardProps {
-    item: ItemList[number];
+    item: itemSelect;
+    itemAiAnalysis: itemAiAnalysisSelect | null;
 }
 
-export function ItemCard({ item }: ItemCardProps) {
+export function ItemCard({ item, itemAiAnalysis }: ItemCardProps) {
     if (!item) {
         return <div>Error Loading Item</div>;
     }
@@ -26,9 +28,7 @@ export function ItemCard({ item }: ItemCardProps) {
         style: "currency",
         currency: item.priceCurrency,
     }).format(parseFloat(item.priceValue));
-
-    const conditionDisplay = item.condition ? item.condition : "N/A";
-    console.log(item);
+    console.log(itemAiAnalysis);
     return (
         <Card
             className={cn(
@@ -42,7 +42,7 @@ export function ItemCard({ item }: ItemCardProps) {
                         src={item.primaryImageUrl ?? ""}
                         alt={item.title || "Item image"}
                         fill
-                        className="object-cover transition-transform duration-300 "
+                        className="object-cover transition-transform duration-300 hover:scale-105"
                         sizes="340px"
                     />
                 </div>
@@ -58,7 +58,7 @@ export function ItemCard({ item }: ItemCardProps) {
                     <div className="flex items-baseline justify-between">
                         <span className="text-lg font-semibold">{formattedPrice}</span>
                         <Badge variant="secondary" className="text-xs">
-                            {conditionDisplay}
+                            {itemAiAnalysis?.score}
                         </Badge>
                     </div>
                 </div>

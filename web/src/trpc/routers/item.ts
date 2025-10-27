@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { router, publicProcedure } from '../init';
-import { desc, eq, item, search } from '@db'
+import { router, publicProcedure, protectedProcedure } from '../init';
+import { desc, eq, getItemInformation, item, search } from '@db'
 
 export const itemRouter = router({
     getAll: publicProcedure
@@ -15,14 +15,14 @@ export const itemRouter = router({
             });
             return allItems;
         }),
-    getBySearchId: publicProcedure
+    getBySearchId: protectedProcedure
         .input(z.object({
             searchId: z.number()
         }).required()).query(async ({ ctx, input }) => {
             const searchId = input?.searchId;
-            const searches = (await ctx.db).select().from(item)
-                .where(eq(item.searchId, searchId));
-            return searches;
+            const userId = ctx.userId;
+            const db = await ctx.db;
+            return await getItemInformation(db, searchId, userId);
         }),
     getById: publicProcedure
         .input(z.object({

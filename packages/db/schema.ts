@@ -33,7 +33,7 @@ export const itemAiAnalysis = pgTable('item_ai_analysis', {
     id: serial('id').primaryKey(),
     searchId: integer('search_id').notNull(),
     // External ID the item analysis belongs to 
-    searchItemId: varchar('external_id', { length: 100 }).notNull(),
+    searchItemId: varchar('search_item_id', { length: 100 }).notNull(),
     // combination, only one the user will see
     score: integer('score').notNull(),
     // score that all items will have 

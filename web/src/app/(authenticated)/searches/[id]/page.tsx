@@ -3,7 +3,7 @@
 import { ItemCard } from "@/components/item/item-card";
 import { PageHeader } from "@/components/layout/page-header";
 import { trpc } from "@/trpc/react"
-import { ItemList } from "@/trpc/shared";
+import { ItemListDto } from "@/trpc/shared";
 import { use } from "react";
 
 const parseSearchId = (id: string) => {
@@ -26,6 +26,7 @@ export default function SearchItemsPage({ params }: { params: Promise<{ id: stri
     }
     const { data: search, isLoading: searchLoading, isError: searchIsError, error: searchError } = trpc.search.getSearchById.useQuery({ id: searchId });
     const { data: items, isLoading, isError, error } = trpc.item.getBySearchId.useQuery({ searchId: searchId })
+    console.log(items);
 
     return (
         <div className="w-full ">
@@ -40,9 +41,13 @@ export default function SearchItemsPage({ params }: { params: Promise<{ id: stri
             />
             <div className="p-4" >
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 xxl:grid-cols-6">
-                    {items && items.map((item: ItemList[number]) => (
-                        <ItemCard key={item.id} item={item} />
-                    ))}
+                    {items && items.map((itemDto: ItemListDto[number]) => {
+                        const { item, search, item_ai_analysis } = itemDto;
+                        console.log(`in map ${item_ai_analysis}`);
+
+                        return <ItemCard key={item.id} item={item} itemAiAnalysis={item_ai_analysis} />
+                    }
+                    )}
                 </div>
             </div>
         </div>

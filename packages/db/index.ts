@@ -1,7 +1,7 @@
 export * from './node-db'
 export * from './worker-db'
 export * from './schema'
-
+export * from './queries'
 export {
     and,
     or,
