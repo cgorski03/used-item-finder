@@ -83,7 +83,7 @@ export function ItemCard({ item, itemAiAnalysis }: ItemCardProps) {
                                                 </span>
                                             </div>
                                             <p className="text-xs leading-relaxed text-foreground">
-                                                {itemAiAnalysis.attributesReasoning}
+                                                {itemAiAnalysis.imageReasoning || itemAiAnalysis.attributesReasoning}
                                             </p>
                                             <div className="pt-1 border-t">
                                                 <p className="text-[10px] text-muted-foreground">

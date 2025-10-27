@@ -22,7 +22,7 @@ export const item = pgTable('item', {
     discoveredAt: timestamp('discovered_at').defaultNow().notNull(),
     lastSeen: timestamp('last_seen').defaultNow().notNull(),
 }, (table) => ({
-    earchExternalUnique: unique('item_search_external_unique')
+    searchExternalUnique: unique('item_search_external_unique')
         .on(table.searchId, table.externalId),
 }));
 
@@ -43,7 +43,10 @@ export const itemAiAnalysis = pgTable('item_ai_analysis', {
     imageScore: integer('image_score'),
     imageReasoning: varchar('image_reasoning', { length: 600 }),
     analyzedAt: timestamp('analyzed_at').defaultNow().notNull(),
-});
+}, (table) => ({
+    analysisUnique: unique('item_analysis_search_unique')
+        .on(table.searchId, table.searchItemId)
+}));
 
 export type itemAiAnalysisSelect = typeof itemAiAnalysis.$inferSelect;
 export type itemAiAnalysisInsert = typeof itemAiAnalysis.$inferInsert;
