@@ -8,11 +8,12 @@ export function getItemInformation(db: Database, searchId: number, userId: numbe
     const statement = db
         .select()
         .from(item)
-        .leftJoin(itemAiAnalysis, eq(itemAiAnalysis.searchItemId, item.externalId))
-        .leftJoin(search, eq(item.searchId, search.id))
+        .innerJoin(itemAiAnalysis, eq(itemAiAnalysis.searchItemId, item.externalId))
+        .innerJoin(search, eq(item.searchId, search.id))
         .where(
             and(
                 eq(item.searchId, searchId),
+                eq(itemAiAnalysis.searchId, searchId),
                 eq(search.userId, userId)
             )
         );

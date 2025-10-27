@@ -16,6 +16,7 @@ const parseSearchId = (id: string) => {
 }
 export default function SearchItemsPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
+    console.log(id);
     const searchId = parseSearchId(id);
     if (searchId === -1) {
         return (

@@ -5,7 +5,7 @@ export type NewItem = typeof item.$inferInsert;
 
 export async function getSearchesToQueue(db: WorkerDb) {
     try {
-        const results = await db
+        const query = db
             .select({ id: search.id })
             .from(search)
             .where(
@@ -21,6 +21,8 @@ export async function getSearchesToQueue(db: WorkerDb) {
                 )
             );
 
+        console.log(`${query.toSQL()}`);
+        const results = await query;
         console.log(`getSearchesToQueue found ${results.length} searches`);
 
         // Debug: check what's actually in the database
@@ -31,6 +33,12 @@ export async function getSearchesToQueue(db: WorkerDb) {
     }
     catch (error: any) {
         console.error(`Error retrieving searches from database ${error}`);
+        console.error('Error details:', {
+            message: error.message,
+            code: error.code,
+            detail: error.detail,
+            stack: error.stack,
+        });
         // Rethrow
         throw new Error(error);
     }
@@ -67,6 +75,7 @@ export const createDbItemObjectFromSummaryHelper = (ebayItem: EbayItemSummary) =
         rawData: ebayItem,
     };
 }
+
 export const getSearchObjects = async (db: WorkerDb, ids: number[]) => {
     return await db.select().from(search).where(inArray(search.id, ids));
 }
@@ -145,12 +154,24 @@ export const getItemSearchObjects = async (db: WorkerDb, itemIds: number[]) => {
     }
 }
 
-export const saveItemBasicScore = async (db: WorkerDb, item: itemAiAnalysisInsert) => {
+export const saveItemBasicScore = async (db: WorkerDb, newItemAnalysis: itemAiAnalysisInsert) => {
     try {
-        await db.insert(itemAiAnalysis).values(item);
+        await db.insert(itemAiAnalysis)
+            .values(newItemAnalysis)
+            .onConflictDoUpdate({
+                target: [itemAiAnalysis.searchId, itemAiAnalysis.searchItemId],
+                set: {
+                    score: newItemAnalysis.score,
+                    attributesScore: newItemAnalysis.attributesScore,
+                    attributesReasoning: newItemAnalysis.attributesReasoning,
+                    imageScore: newItemAnalysis.imageScore,
+                    imageReasoning: newItemAnalysis.imageReasoning,
+                    analyzedAt: new Date(),
+                }
+            });
     }
     catch (error: any) {
-        console.error(`Error analysis for search ${item.searchId} ${item.searchItemId} to database`);
+        console.error(`Error analysis for search ${newItemAnalysis.searchId} ${newItemAnalysis.searchItemId} to database`);
         console.error('Error details:', {
             message: error.message,
             code: error.code,

@@ -4,7 +4,8 @@ import { GoogleGenerativeAIProvider } from '@ai-sdk/google';
 import { generateText } from 'ai';
 import { basicAnalysisPrompt } from './system';
 import { parseJsonModelOutput } from './parse';
-import { saveItemBasicScore } from '../repository';
+
+const IMAGE_ANALYSIS_SCORE_THRESHOLD = 70;
 
 const generateBasicAnalysisPrompt = (item: itemSelect, search: searchSelect) => {
     const itemDetails = `
@@ -36,16 +37,57 @@ const getScore = async (ai: GoogleGenerativeAIProvider, item: itemSelect, search
     // Save this score to the database
 }
 
+const scoreImages = async (ai: GoogleGenerativeAIProvider, item: itemSelect, search: searchSelect) => {
+    const additional = item.additionalImageUrls ?? [];
+    const imageUrls = [item.primaryImageUrl, ...additional]
+        .filter((url): url is string => url !== null);
+
+    if (imageUrls.length === 0) return null;
+
+    const { text, providerMetadata } = await generateText({
+        model: ai('gemini-2.5-flash-lite'),
+        system: basicAnalysisPrompt,
+        messages: [
+            {
+                role: 'user',
+                content: [
+                    {
+                        type: 'text',
+                        text: generateBasicAnalysisPrompt(item, search),
+                    },
+                    ...imageUrls.map((url) => ({
+                        type: 'image' as const,
+                        image: url,
+                    })),
+                ],
+            },
+        ],
+    });
+
+    console.log(`${providerMetadata}`);
+    const result = parseJsonModelOutput(text);
+    if (!result) {
+        throw new Error("Error with model response.");
+    }
+    return result;
+}
+
 export async function analyzeItem(api_key: string, item: itemSelect, search: searchSelect) {
     // ensure the properties exist
     // do quick check on ebay item titel
     const ai = google(api_key);
     const basicRes = await getScore(ai, item, search);
+    let imageScore;
+    if (basicRes.score > IMAGE_ANALYSIS_SCORE_THRESHOLD) {
+        console.log("Item exceeded score threshold. Running image analysis");
+        imageScore = await scoreImages(ai, item, search);
+    }
+
     return {
         ...basicRes,
         // this is a placeholder for when i will actually have these attributes
-        imageScore: null,
-        imageReasoning: null
+        imageScore: imageScore?.score ?? null,
+        imageReasoning: imageScore?.reasoning ?? null
     }
     //TODO this will get skipped on a score test after phase 2
     // if above basic threshold, do image analysis and add scoring to db
