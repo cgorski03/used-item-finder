@@ -9,10 +9,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import Image from "next/image";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ItemListDto } from "@/trpc/shared";
 import { itemAiAnalysisSelect, itemSelect } from "@db";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@radix-ui/react-tooltip";
 
 interface ItemCardProps {
     item: itemSelect;
@@ -57,9 +57,54 @@ export function ItemCard({ item, itemAiAnalysis }: ItemCardProps) {
 
                     <div className="flex items-baseline justify-between">
                         <span className="text-lg font-semibold">{formattedPrice}</span>
-                        <Badge variant="secondary" className="text-xs">
-                            {itemAiAnalysis?.score}
-                        </Badge>
+                        {itemAiAnalysis ? (
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <div className="flex items-center gap-1 cursor-default">
+                                            <Sparkles className="h-4 w-4 text-amber-500" />
+                                            <Badge
+                                                variant="secondary"
+                                                className="text-xs bg-amber-50 hover:bg-amber-100"
+                                            >
+                                                {itemAiAnalysis.score}%
+                                            </Badge>
+                                        </div>
+                                    </TooltipTrigger>
+                                    <TooltipContent
+                                        side="left"
+                                        className="max-w-xs bg-popover border shadow-lg rounded-lg p-3 animate-in fade-in duration-200"
+                                    >
+                                        <div className="space-y-2">
+                                            <div className="flex items-center justify-between gap-4">
+                                                <p className="font-semibold text-sm">AI Analysis Score</p>
+                                                <span className="text-xs text-muted-foreground">
+                                                    {itemAiAnalysis.score}%
+                                                </span>
+                                            </div>
+                                            <p className="text-xs leading-relaxed text-foreground">
+                                                {itemAiAnalysis.attributesReasoning}
+                                            </p>
+                                            <div className="pt-1 border-t">
+                                                <p className="text-[10px] text-muted-foreground">
+                                                    Analyzed{' '}
+                                                    {new Date(itemAiAnalysis.analyzedAt).toLocaleString('en-US', {
+                                                        month: 'short',
+                                                        day: 'numeric',
+                                                        hour: 'numeric',
+                                                        minute: '2-digit',
+                                                    })}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
+                        ) : (
+                            <Badge variant="outline" className="text-xs">
+                                Not analyzed
+                            </Badge>
+                        )}
                     </div>
                 </div>
             </CardContent>
