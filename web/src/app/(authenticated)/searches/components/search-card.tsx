@@ -8,14 +8,15 @@ import { MoreVertical, Package, Pause, Play, Square, TrendingUp } from "lucide-r
 
 interface SearchCardProps {
     search: SearchList[number]
+    onToggleStatus: (searchId: number, active: boolean) => void;
+    isUpdating: boolean;
 }
 
-export function SearchCard({ search }: SearchCardProps) {
+export function SearchCard({ search, onToggleStatus }: SearchCardProps) {
     const status = search.active ? "active" : "paused";
     const itemsFound = 0; // TODO
     const newToday = 0; // TODO
     const source = "eBay"; // TODO
-
     return (
         <Card>
             <CardHeader className="pb-3">
@@ -83,19 +84,20 @@ export function SearchCard({ search }: SearchCardProps) {
                 <Button variant="outline" className="flex-1" asChild>
                     <Link href={`/searches/${search.id}`}>View Items</Link>
                 </Button>
-                <Button variant="ghost" size="icon">
+                <Button variant="ghost" size="icon"
+                    onClick={() => onToggleStatus(search.id, !search.active)}>
                     {search.active ? (
-                        <Pause className="h-4 w-4" />
-                    ) : (
-                        <Play className="h-4 w-4" />
-                    )}
-                    <span className="sr-only">
-                        {search.active ? "Pause" : "Resume"} search
-                    </span>
-                </Button>
-                <Button variant="ghost" size="icon">
-                    <Square className="h-4 w-4" />
-                    <span className="sr-only">Stop search</span>
+                        <>
+                            <Square className="h-4 w-4" />
+                            <span className="sr-only">Stop search</span>
+                        </>
+                    ) :
+                        (
+                            <>
+                                <Play className="h-4 w-4" />
+                                <span className="sr-only">Stop search</span>
+                            </>
+                        )}
                 </Button>
             </CardFooter>
         </Card>

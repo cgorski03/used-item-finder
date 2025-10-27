@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { router, protectedProcedure } from '../init';
-import { eq, search, and } from '@db'
+import { eq, search, and, setSearchActive } from '@db'
 
 export const searchRouter = router({
     getSearchById: protectedProcedure
@@ -51,5 +51,17 @@ export const searchRouter = router({
 
             return insertedSearch;
         }),
+    setSearchActive: protectedProcedure
+        .input(
+            z.object({
+                active: z.boolean(),
+                searchId: z.number().min(0),
+            })
+        ).mutation(async ({ ctx, input }) => {
+            const db = await ctx.db;
+            const res = await setSearchActive(db, input.searchId, ctx.userId, input.active);
+            return res;
+        }
+        )
 })
 
