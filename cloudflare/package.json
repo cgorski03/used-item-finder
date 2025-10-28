@@ -1,23 +1,23 @@
 {
-	"name": "@workers/search-producer",
-	"version": "0.0.0",
-	"private": true,
-	"scripts": {
-		"deploy": "wrangler deploy",
-		"dev": "wrangler dev",
-		"start": "wrangler dev",
-		"test": "vitest",
-		"cf-typegen": "wrangler types"
-	},
-	"dependencies": {
-		"@ai-sdk/google": "^2.0.23",
-		"@db": "workspace:*",
-		"@workers/shared": "workspace:*",
-		"ai": "^5.0.78",
-		"wrangler": "^4.43.0"
-	},
-	"devDependencies": {
-		"@cloudflare/vitest-pool-workers": "^0.9.13",
-		"vitest": "~3.2.4"
-	}
+  "name": "@search-handler",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "start": "wrangler dev",
+    "test": "vitest",
+    "cf-typegen": "wrangler types"
+  },
+  "dependencies": {
+    "@ai-sdk/google": "^2.0.23",
+    "@db": "workspace:*",
+    "ai": "^5.0.78",
+    "ebay-oauth-nodejs-client": "^1.2.2",
+    "wrangler": "^4.43.0"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.9.13",
+    "vitest": "~3.2.4"
+  }
 }

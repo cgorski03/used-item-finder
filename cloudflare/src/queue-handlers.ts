@@ -1,14 +1,14 @@
 import { getWorkerDb } from "@db";
 import { createDbItemObjectFromSummaryHelper, getItemSearchObjects, getSearchObjects, NewItem, saveItemBasicScore, saveItemsAndUpdateSearch } from "./repository";
 import { analyzeItem } from "./ai/analyze-item";
-import { parseAccessToken } from "./ebay/tokens";
-import { AiAnalysisMessage, SearchMessage } from "./types/queue";
-import { EbayItemSummary, searchEbay } from "./ebay/api";
+import { type AiAnalysisMessage, type SearchMessage } from "./types/queue";
+import { type EbayItemSummary, searchEbay } from "./ebay/api";
+import { parseAccessTokenHelper } from "./ebay/tokens";
 
 export async function handleSearchRequest(batch: MessageBatch<SearchMessage>, env: Env, ctx: ExecutionContext) {
     // without access token, no searches will succeed
     console.log(`Handling search batch: ${batch.messages}`);
-    const accessToken = parseAccessToken(await env.AUTH_TOKEN_KV.get(env.EBAY_KV_KEY, { type: 'json' }));
+    const accessToken = parseAccessTokenHelper(await env.AUTH_TOKEN_KV.get(env.EBAY_KV_KEY, { type: 'json' }));
     if (!accessToken) {
         throw new Error('No access token');
     }

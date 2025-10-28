@@ -1,10 +1,9 @@
-export type AccessTokenKVObject = {
-    access_token: string;
-    expires_at: number; // UTC Timestamp in ms
-}
+import { EbayAuthTokenOptions } from "ebay-oauth-nodejs-client";
+import { getAccessToken } from "./api";
 
+const EXPIRATION_BUFFER_MINUTES = 15;
 
-export function parseAccessToken(accessToken: unknown): AccessTokenKVObject | null {
+export function parseAccessTokenHelper(accessToken: unknown): AccessTokenKVObject | null {
     if (!accessToken || typeof accessToken !== "object") return null;
     if (!("access_token" in accessToken) || !("expires_at" in accessToken)) return null;
 
@@ -12,4 +11,49 @@ export function parseAccessToken(accessToken: unknown): AccessTokenKVObject | nu
     if (typeof tokenObj.expires_at !== 'number' || typeof tokenObj.access_token !== 'string') return null;
     return tokenObj
 }
+
+export type AccessTokenKVObject = {
+    access_token: string;
+    expires_at: number; // UTC Timestamp in ms
+}
+
+const shouldGetNewTokenHelper = (accessToken: unknown, expirationBufferMinutes: number = EXPIRATION_BUFFER_MINUTES): boolean => {
+    // type guards
+    const token = parseAccessTokenHelper(accessToken);
+    if (!token) return true;
+    // Check if it is going to expire in the next 15 minutes
+    const currentUtcTimestampMs = Date.now();
+    if ((token.expires_at - (expirationBufferMinutes * 60 * 1000)) < currentUtcTimestampMs) {
+        return true;
+    }
+    return false;
+}
+
+export async function setEbayToken(item_finder_kv: KVNamespace, EBAY_TOKEN_KEY: string, ebayCredentials: EbayAuthTokenOptions) {
+    // Get the current token from the KV 
+    let accessToken = await item_finder_kv.get(EBAY_TOKEN_KEY, { type: 'json' });
+    if (!shouldGetNewTokenHelper(accessToken)) {
+        console.log(`Token within ${EXPIRATION_BUFFER_MINUTES} minutes. Refreshing token is not necessary`);
+        return;
+    }
+    // Get another token
+    try {
+        const newToken = await getAccessToken(ebayCredentials)
+        console.log(newToken);
+        const kvObj: AccessTokenKVObject = {
+            access_token: newToken.access_token,
+            expires_at: Date.now() + newToken.expires_in * 1000
+        }
+        console.log(kvObj);
+        // Save new token
+        await item_finder_kv.put(EBAY_TOKEN_KEY, JSON.stringify(kvObj))
+        console.log(await item_finder_kv.get(EBAY_TOKEN_KEY));
+    } catch (error: any) {
+        console.error(`Failed to get new token from ebay API. Error: ${error}`)
+        // rethrow error for observability
+        throw error;
+    }
+}
+
+
 

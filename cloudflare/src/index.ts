@@ -1,9 +1,9 @@
 import { closeWorkerDb, getWorkerDb, } from "@db";
-import { setEbayToken } from "./ebay-token-utils";
 import { type AiAnalysisMessage, type SearchMessage } from "./types/queue";
 import { handleAiAnalysisRequest, handleSearchRequest } from "./queue-handlers";
 import { getSearchesToQueue } from "./repository";
 import { EbayAuthTokenOptions } from "ebay-oauth-nodejs-client";
+import { setEbayToken } from "./ebay/tokens";
 
 export default {
     async scheduled(controller: ScheduledController, env: Env, ctx: ExecutionContext) {
