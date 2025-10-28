@@ -1,4 +1,4 @@
-import { getAccessToken } from "./ebay-api";
+import { getAccessToken } from "./api";
 import { vi, describe, beforeEach, it, expect } from 'vitest';
 
 vi.mock('ebay-oauth-nodejs-client', () => ({

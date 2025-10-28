@@ -1,4 +1,4 @@
 packages:
   - 'web/'
-  - 'cloudflare/workers/*'
+  - 'cloudflare/'
   - 'packages/db/'

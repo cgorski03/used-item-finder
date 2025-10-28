@@ -30,6 +30,9 @@ importers:
       ai:
         specifier: ^5.0.78
         version: 5.0.78(zod@4.1.12)
+      ebay-oauth-nodejs-client:
+        specifier: ^1.2.2
+        version: 1.2.2
       wrangler:
         specifier: ^4.43.0
         version: 4.43.0(@cloudflare/workers-types@4.20251011.0)

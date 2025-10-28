@@ -1,5 +1,5 @@
 import { WorkerDb, search, item, and, eq, isNull, lte, or, sql, inArray, itemAiAnalysisInsert, itemAiAnalysis } from "@db";
-import { EbayItemSummary } from "@workers/shared";
+import { EbayItemSummary } from "./ebay/api";
 
 export type NewItem = typeof item.$inferInsert;
 
