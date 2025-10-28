@@ -6,6 +6,7 @@ import { basicAnalysisPrompt } from './system';
 import { parseJsonModelOutput } from './parse';
 
 const IMAGE_ANALYSIS_SCORE_THRESHOLD = 70;
+const ANALYSIS_MODEL = 'gemini-2.5-flash-lite'
 
 const generateBasicAnalysisPrompt = (item: itemSelect, search: searchSelect) => {
     const itemDetails = `
@@ -23,7 +24,7 @@ const generateBasicAnalysisPrompt = (item: itemSelect, search: searchSelect) => 
 
 const getScore = async (ai: GoogleGenerativeAIProvider, item: itemSelect, search: searchSelect) => {
     const { text, providerMetadata } = await generateText({
-        model: ai('gemini-2.5-flash-lite'),
+        model: ai(ANALYSIS_MODEL),
         system: basicAnalysisPrompt,
         prompt: generateBasicAnalysisPrompt(item, search),
     });
@@ -45,7 +46,7 @@ const scoreImages = async (ai: GoogleGenerativeAIProvider, item: itemSelect, sea
     if (imageUrls.length === 0) return null;
 
     const { text, providerMetadata } = await generateText({
-        model: ai('gemini-2.5-flash-lite'),
+        model: ai(ANALYSIS_MODEL),
         system: basicAnalysisPrompt,
         messages: [
             {
@@ -87,7 +88,8 @@ export async function analyzeItem(api_key: string, item: itemSelect, search: sea
         ...basicRes,
         // this is a placeholder for when i will actually have these attributes
         imageScore: imageScore?.score ?? null,
-        imageReasoning: imageScore?.reasoning ?? null
+        imageReasoning: imageScore?.reasoning ?? null,
+        model: ANALYSIS_MODEL,
     }
     //TODO this will get skipped on a score test after phase 2
     // if above basic threshold, do image analysis and add scoring to db

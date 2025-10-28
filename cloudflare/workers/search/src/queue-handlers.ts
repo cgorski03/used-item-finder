@@ -70,6 +70,7 @@ export async function handleAiAnalysisRequest(batch: MessageBatch<AiAnalysisMess
                 attributesReasoning: analysis.reasoning,
                 imageReasoning: analysis.imageReasoning,
                 imageScore: analysis.imageScore,
+                model: analysis.model,
             })
         }));
 

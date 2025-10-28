@@ -43,6 +43,7 @@ export const itemAiAnalysis = pgTable('item_ai_analysis', {
     imageScore: integer('image_score'),
     imageReasoning: varchar('image_reasoning', { length: 600 }),
     analyzedAt: timestamp('analyzed_at').defaultNow().notNull(),
+    model: varchar('model', { length: 20 }),
 }, (table) => ({
     analysisUnique: unique('item_analysis_search_unique')
         .on(table.searchId, table.searchItemId)
