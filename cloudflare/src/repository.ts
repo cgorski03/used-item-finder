@@ -1,4 +1,4 @@
-import { WorkerDb, search, item, and, eq, isNull, lte, or, sql, inArray, itemAiAnalysisInsert, itemAiAnalysis } from "@db";
+import { WorkerDb, search, item, and, eq, isNull, lte, or, sql, inArray, itemAiAnalysisInsert, itemAiAnalysis, itemInsert } from "@db";
 import { EbayItemSummary } from "./ebay/api";
 
 export type NewItem = typeof item.$inferInsert;
@@ -52,12 +52,6 @@ export const createDbItemObjectFromSummaryHelper = (ebayItem: EbayItemSummary) =
         !ebayItem.itemWebUrl) {
         return null
     }
-    const toDate = (value: string | Date | undefined | null): Date | null => {
-        if (!value) return null;
-        if (value instanceof Date) return value;
-        if (typeof value === 'string') return new Date(value);
-        return null;
-    };
     return {
         externalId: ebayItem.itemId,
         title: ebayItem.title,
@@ -65,7 +59,10 @@ export const createDbItemObjectFromSummaryHelper = (ebayItem: EbayItemSummary) =
         priceCurrency: ebayItem.price.currency || "USD",
         url: ebayItem.itemWebUrl,
         primaryImageUrl: ebayItem.image?.imageUrl ?? null,
-        additionalImageUrls: ebayItem.additionalImages?.map(img => img.imageUrl) ?? null,
+        additionalImageUrls: ebayItem.additionalImages
+            ?.map(img => img?.imageUrl)
+            .filter((url): url is string => url !== undefined)
+            ?? null,
         condition: ebayItem.condition ?? null,
         conditionId: ebayItem.conditionId ?? null,
         buyingOptions: ebayItem.buyingOptions ?? null,
@@ -73,6 +70,7 @@ export const createDbItemObjectFromSummaryHelper = (ebayItem: EbayItemSummary) =
         itemEndDate: ebayItem.itemEndDate ? new Date(ebayItem.itemEndDate) : null,
         sellerUsername: ebayItem.seller?.username ?? null,
         rawData: ebayItem,
+        description: ebayItem.shortDescription,
     };
 }
 

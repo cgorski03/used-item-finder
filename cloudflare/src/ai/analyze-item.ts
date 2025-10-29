@@ -13,6 +13,7 @@ const generateBasicAnalysisPrompt = (item: itemSelect, search: searchSelect) => 
             Item Title: ${item.title}
             Item Price: ${item.priceValue} ${item.priceCurrency}
             Item Condition: ${item.condition || "Not specified"}
+            Item Seller Description: ${item.description || "None"}
             `.trim()
 
     const userPrompt = `Item details: ${itemDetails}

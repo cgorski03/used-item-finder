@@ -1,4 +1,4 @@
-import { pgTable, boolean, integer, serial, varchar, decimal, jsonb, timestamp, unique } from 'drizzle-orm/pg-core';
+import { pgTable, boolean, integer, serial, varchar, decimal, jsonb, timestamp, unique, pgEnum, text } from 'drizzle-orm/pg-core';
 
 export const item = pgTable('item', {
     id: serial('id').primaryKey(),
@@ -17,6 +17,7 @@ export const item = pgTable('item', {
     buyingOptions: jsonb('buying_options').$type<string[]>(), // e.g., ['FIXED_PRICE']
     itemCreationDate: timestamp('item_creation_date'),
     itemEndDate: timestamp('item_end_date'),
+    description: varchar('description', { length: 2000 }),
     sellerUsername: varchar('seller_username', { length: 100 }), // From seller.username
     rawData: jsonb('raw_data'),
     discoveredAt: timestamp('discovered_at').defaultNow().notNull(),

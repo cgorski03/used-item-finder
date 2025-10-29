@@ -35,16 +35,25 @@ export async function searchEbay(keywords: string, accessToken: string, ebayEnv:
     const endpoint = getBaseUrl(ebayEnv);
     const queryParams: EbaySearchQuery = {
         q: keywords,
-        limit: "50",
-        offset: "0"
+        limit: "200",
+        offset: "0",
+        fieldgroups: "EXTENDED"
     };
     const searchParams = getUrlSearchParams(queryParams);
     const headers = getEbaySearchHeaders(accessToken);
     try {
-        const response = await fetch(`${endpoint}?${searchParams.toString()}`, {
+        // Construct the request options
+        const requestOptions = {
             method: 'GET',
             headers: headers as Record<string, string>, // Cast for fetch signature compatibility
-        });
+        };
+
+        // Print the full request details
+        console.log('Request URL:', `${endpoint}?${searchParams.toString()}`);
+        console.log('Request Options:', requestOptions);
+
+        // Make the request
+        const response = await fetch(`${endpoint}?${searchParams.toString()}`, requestOptions);
         if (!response.ok) {
             // The generated types for 400/500 say 'content?: never',
             // so we might not get a JSON error body. Read as text for better debugging.
