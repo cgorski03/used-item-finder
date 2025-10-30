@@ -31,11 +31,12 @@ export const getAccessToken = async (options: EbayAuthTokenOptions): Promise<Acc
     return JSON.parse(await token.getApplicationToken(options.env));
 }
 
-export async function searchEbay(keywords: string, accessToken: string, ebayEnv: EbayEnv): Promise<EbayItemSummary[]> {
+export async function searchEbay(keywords: string, accessToken: string, ebayEnv: EbayEnv):
+    Promise<{ apiItemCount: number, apiItems: EbayItemSummary[] }> {
     const endpoint = getBaseUrl(ebayEnv);
     const queryParams: EbaySearchQuery = {
         q: keywords,
-        limit: "200",
+        limit: "100",
         offset: "0",
         fieldgroups: "EXTENDED"
     };
@@ -64,7 +65,10 @@ export async function searchEbay(keywords: string, accessToken: string, ebayEnv:
             );
         }
         const data: EbaySearchResponse = await response.json();
-        return data.itemSummaries || [];
+        return {
+            apiItemCount: data.total || 0,
+            apiItems: data.itemSummaries || []
+        };
     } catch (error: any) {
         console.error(`error(ebay-api.searchEbay): ${error}`);
         throw (error);

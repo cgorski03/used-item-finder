@@ -21,13 +21,10 @@ export async function getSearchesToQueue(db: WorkerDb) {
                 )
             );
 
-        console.log(`${query.toSQL()}`);
         const results = await query;
-        console.log(`getSearchesToQueue found ${results.length} searches`);
 
         // Debug: check what's actually in the database
         const all = await db.select().from(search);
-        console.log(`Total searches in DB: ${all.length}`, all);
 
         return results;
     }
@@ -165,6 +162,7 @@ export const saveItemBasicScore = async (db: WorkerDb, newItemAnalysis: itemAiAn
                     imageScore: newItemAnalysis.imageScore,
                     imageReasoning: newItemAnalysis.imageReasoning,
                     analyzedAt: new Date(),
+                    model: newItemAnalysis.model,
                 }
             });
     }

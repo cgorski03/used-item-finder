@@ -23,6 +23,11 @@ export const item = pgTable('item', {
     discoveredAt: timestamp('discovered_at').defaultNow().notNull(),
     lastSeen: timestamp('last_seen').defaultNow().notNull(),
 }, (table) => ({
+    searchIdFk: foreignKey({
+        name: 'item_search_id_fkey',
+        columns: [table.searchId],
+        foreignColumns: [search.id],
+    }).onDelete('cascade'),
     searchExternalUnique: unique('item_search_external_unique')
         .on(table.searchId, table.externalId),
 }));
