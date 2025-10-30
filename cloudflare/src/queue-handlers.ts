@@ -1,13 +1,15 @@
 import { getWorkerDb } from "@db";
-import { createDbItemObjectFromSummaryHelper, getItemSearchObjects, getSearchObjects, NewItem, saveItemBasicScore, saveItemsAndUpdateSearch } from "./repository";
+import { getItemSearchObjects, getSearchObjects, saveItemBasicScore, saveItemsAndUpdateSearch, saveSearchRunFailure, saveSearchRunStub, saveSearchRunSuccess } from "./repository";
 import { analyzeItem } from "./ai/analyze-item";
 import { type AiAnalysisMessage, type SearchMessage } from "./types/queue";
 import { type EbayItemSummary, searchEbay } from "./ebay/api";
 import { parseAccessTokenHelper } from "./ebay/tokens";
+import { processEbayItemsForDb } from "./lib/ebay-to-db";
+import { MessageConversionError } from "ai";
 
 export async function handleSearchRequest(batch: MessageBatch<SearchMessage>, env: Env, ctx: ExecutionContext) {
     // without access token, no searches will succeed
-    console.log(`Handling search batch: ${batch.messages}`);
+    console.log(`Handling search batch: ${batch.messages.length}`);
     const accessToken = parseAccessTokenHelper(await env.AUTH_TOKEN_KV.get(env.EBAY_KV_KEY, { type: 'json' }));
     if (!accessToken) {
         throw new Error('No access token');
@@ -23,24 +25,39 @@ export async function handleSearchRequest(batch: MessageBatch<SearchMessage>, en
     if (searches.length !== searchIds.length) {
         console.warn(`Called with ${searchIds} but only found ${searches}`);
     }
-    await Promise.all(searches.map(async (search) => {
-        const searchResults = await searchEbay(search.keywords, accessToken.access_token, env.EBAY_ENV);
-        const items = searchResults.map((ebayItem: EbayItemSummary) => {
-            const itemObj = createDbItemObjectFromSummaryHelper(ebayItem);
-            if (!itemObj) {
-                console.warn(`Item is missing required field ${ebayItem}`)
-            } else {
-                return { ...itemObj, searchId: search.id } as NewItem;
+    await Promise.allSettled(searches.map(async (search) => {
+        console.log(search);
+        const searchRun = await saveSearchRunStub(db, search.id);
+        try {
+            const { apiItemCount, apiItems } = await searchEbay(search.keywords, accessToken.access_token, env.EBAY_ENV);
+            console.log(apiItemCount, apiItemCount);
+            const newDbItems = processEbayItemsForDb(search.id, apiItems);
+            const newRowsInserted = await saveItemsAndUpdateSearch(db, newDbItems, search.id)
+            await saveSearchRunSuccess(db, {
+                searchRun,
+                totalApiItems: apiItemCount,
+                newItemsInserted: newRowsInserted.length,
+            })
+            const newIds = newRowsInserted
+                .map((row) => ({
+                    body: { item_id: row.id },
+                }));
+            if (newIds.length !== 0) {
+                await env.AI_ANALYSIS_QUEUE.sendBatch(newIds);
             }
-        }).filter((it) => it != null);
-        const newRows = await saveItemsAndUpdateSearch(db, items, search.id)
-        const newIds = newRows
-            .map((row) => ({
-                body: { item_id: row.id },
-            }));
-        if (newIds.length !== 0) {
-            await env.AI_ANALYSIS_QUEUE.sendBatch(newIds);
         }
+        catch (err: any) {
+            saveSearchRunFailure(db, {
+                searchRun,
+                errorMessage:
+                    err instanceof Error ? err.message : 'Unknown error',
+                errorDetails: err
+            });
+            console.error(`Search ${search.id} failed`, err);
+            batch.messages.find((ms) => ms.body.search_id === search.id)?.retry();
+            throw err;
+        }
+
     }));
     return {
         success: true

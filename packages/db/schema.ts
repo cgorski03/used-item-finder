@@ -1,4 +1,22 @@
-import { pgTable, boolean, integer, serial, varchar, decimal, jsonb, timestamp, unique, pgEnum, text } from 'drizzle-orm/pg-core';
+import { foreignKey, pgTable, boolean, integer, serial, varchar, decimal, jsonb, timestamp, unique, pgEnum, text } from 'drizzle-orm/pg-core';
+
+export const search = pgTable('search', {
+    id: serial('id').primaryKey(),
+    userId: integer('user_id').notNull(),
+    active: boolean('active').notNull(),
+    // Comma separated list of keywords
+    keywords: varchar('keywords', { length: 500 }).notNull(),
+    title: varchar('title', { length: 50 }).notNull(),
+    aiEnabled: boolean('ai_enabled').notNull(),
+    detailedRequirements: varchar('detailed_requirements', { length: 1000 }),
+    pollIntervalMinutes: integer('poll_interval_minutes').notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+    lastRunAt: timestamp('last_run_at'),
+});
+
+export type searchSelect = typeof search.$inferSelect;
+export type searchInsert = typeof search.$inferInsert;
 
 export const item = pgTable('item', {
     id: serial('id').primaryKey(),
@@ -58,23 +76,25 @@ export const itemAiAnalysis = pgTable('item_ai_analysis', {
 export type itemAiAnalysisSelect = typeof itemAiAnalysis.$inferSelect;
 export type itemAiAnalysisInsert = typeof itemAiAnalysis.$inferInsert;
 
-export const search = pgTable('search', {
+export const searchRunStatus = pgEnum('search_run_status', ['running', 'success', 'failed', 'partial_success']);
+export const searchRun = pgTable('search_run', {
     id: serial('id').primaryKey(),
-    userId: integer('user_id').notNull(),
-    active: boolean('active').notNull(),
-    // Comma separated list of keywords
-    keywords: varchar('keywords', { length: 500 }).notNull(),
-    title: varchar('title', { length: 50 }).notNull(),
-    aiEnabled: boolean('ai_enabled').notNull(),
-    detailedRequirements: varchar('detailed_requirements', { length: 1000 }),
-    pollIntervalMinutes: integer('poll_interval_minutes').notNull(),
-    createdAt: timestamp('created_at').defaultNow().notNull(),
-    updatedAt: timestamp('updated_at').defaultNow().notNull(),
-    lastRunAt: timestamp('last_run_at'),
+    searchId: integer('search_id').notNull().references(() => search.id, { onDelete: 'cascade' }).notNull(),
+    startedAt: timestamp('started_at').defaultNow().notNull(),
+    completedAt: timestamp('completed_at'),
+    // The total number at the top of the EBAY request
+    itemsFoundInApi: integer('items_found_in_api'),
+    // The number of items that were added to the DB we didn't have before
+    newItemsInserted: integer('new_items_inserted'),
+
+    status: searchRunStatus('status').notNull().default('running'),
+    // DLQ will input this information if a search fails for some reason
+    errorMessage: text('error_message'),
+    errorDetails: jsonb('error_details'),
 });
 
-export type searchSelect = typeof search.$inferSelect;
-export type searchInsert = typeof search.$inferInsert;
+export type searchRunSelect = typeof searchRun.$inferSelect;
+export type searchRunInsert = typeof searchRun.$inferInsert;
 /*
 export const userSavedItem = pgTable('userSavedItem', {
     id: serial('id').primaryKey(),

@@ -1,7 +1,5 @@
-import { WorkerDb, search, item, and, eq, isNull, lte, or, sql, inArray, itemAiAnalysisInsert, itemAiAnalysis, itemInsert } from "@db";
+import { WorkerDb, search, item, and, eq, isNull, lte, or, sql, inArray, itemAiAnalysisInsert, itemAiAnalysis, searchRun, searchRunSelect, itemInsert } from "@db";
 import { EbayItemSummary } from "./ebay/api";
-
-export type NewItem = typeof item.$inferInsert;
 
 export async function getSearchesToQueue(db: WorkerDb) {
     try {
@@ -20,13 +18,7 @@ export async function getSearchesToQueue(db: WorkerDb) {
                     )
                 )
             );
-
-        const results = await query;
-
-        // Debug: check what's actually in the database
-        const all = await db.select().from(search);
-
-        return results;
+        return await query;
     }
     catch (error: any) {
         console.error(`Error retrieving searches from database ${error}`);
@@ -41,35 +33,6 @@ export async function getSearchesToQueue(db: WorkerDb) {
     }
 }
 
-export const createDbItemObjectFromSummaryHelper = (ebayItem: EbayItemSummary) => {
-    if (!ebayItem.itemId ||
-        !ebayItem.title ||
-        !ebayItem.price?.value ||
-        !ebayItem.price?.currency ||
-        !ebayItem.itemWebUrl) {
-        return null
-    }
-    return {
-        externalId: ebayItem.itemId,
-        title: ebayItem.title,
-        priceValue: ebayItem.price.value,
-        priceCurrency: ebayItem.price.currency || "USD",
-        url: ebayItem.itemWebUrl,
-        primaryImageUrl: ebayItem.image?.imageUrl ?? null,
-        additionalImageUrls: ebayItem.additionalImages
-            ?.map(img => img?.imageUrl)
-            .filter((url): url is string => url !== undefined)
-            ?? null,
-        condition: ebayItem.condition ?? null,
-        conditionId: ebayItem.conditionId ?? null,
-        buyingOptions: ebayItem.buyingOptions ?? null,
-        itemCreationDate: ebayItem.itemCreationDate ? new Date(ebayItem.itemCreationDate) : null,
-        itemEndDate: ebayItem.itemEndDate ? new Date(ebayItem.itemEndDate) : null,
-        sellerUsername: ebayItem.seller?.username ?? null,
-        rawData: ebayItem,
-        description: ebayItem.shortDescription,
-    };
-}
 
 export const getSearchObjects = async (db: WorkerDb, ids: number[]) => {
     return await db.select().from(search).where(inArray(search.id, ids));
@@ -77,9 +40,9 @@ export const getSearchObjects = async (db: WorkerDb, ids: number[]) => {
 
 export const saveItemsAndUpdateSearch = async (
     db: WorkerDb,
-    items: NewItem[],
+    items: itemInsert[],
     searchId: number
-): Promise<NewItem[]> => {
+): Promise<itemInsert[]> => {
     try {
         console.log(`saving ${items.length} items`);
 
@@ -176,5 +139,48 @@ export const saveItemBasicScore = async (db: WorkerDb, newItemAnalysis: itemAiAn
         });
         throw error;
     }
-
 }
+
+export const saveSearchRunStub = async (db: WorkerDb, searchId: number) => {
+    const [searchRunInstance] = await db.insert(searchRun).values({
+        searchId,
+        startedAt: new Date(),
+    }).returning();
+    console.log(searchRunInstance);
+    return searchRunInstance;
+}
+
+type searchRunFailureRequest = {
+    searchRun: searchRunSelect,
+    errorMessage: string;
+    errorDetails: Error;
+}
+export const saveSearchRunFailure = async (db: WorkerDb, request: searchRunFailureRequest) => {
+    const [searchRunInstance] = await db.update(searchRun).set({
+        completedAt: new Date(),
+        status: 'failed',
+        errorMessage: request.errorMessage,
+        errorDetails: String(request.errorDetails),
+    })
+        .where(eq(searchRun.id, request.searchRun.id))
+        .returning();
+    return searchRunInstance
+}
+
+type searchRunSuccessRequest = {
+    searchRun: searchRunSelect,
+    totalApiItems: number;
+    newItemsInserted: number;
+}
+export const saveSearchRunSuccess = async (db: WorkerDb, request: searchRunSuccessRequest) => {
+    const [searchRunInstance] = await db.update(searchRun).set({
+        itemsFoundInApi: request.totalApiItems,
+        newItemsInserted: request.newItemsInserted,
+        completedAt: new Date(),
+        status: 'success'
+    })
+        .where(eq(searchRun.id, request.searchRun.id))
+
+    return searchRunInstance
+}
+
