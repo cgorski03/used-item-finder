@@ -4,7 +4,7 @@ import { trpc } from '@/trpc/react'
 import { SearchCard } from './components/search-card';
 
 export default function SearchesGrid() {
-    const { data: searches, isLoading, isError, error } =
+    const { data: searchesWithStats, isLoading, isError, error } =
         trpc.search.getUserSearches.useQuery();
     const utils = trpc.useUtils();
 
@@ -26,14 +26,14 @@ export default function SearchesGrid() {
 
     if (isLoading) return <div className="p-4">Loading...</div>;
     if (isError) return <div className="p-4 text-red-600">{error.message}</div>;
-    if (!searches?.length) return <div className="p-4">No searches found</div>;
+    if (!searchesWithStats?.length) return <div className="p-4">No searches found</div>;
 
     return (
         <div className="grid gap-4 md:grid-cols-2">
-            {searches.map((search) => (
+            {searchesWithStats.map((sws) => (
                 <SearchCard
-                    key={search.id}
-                    search={search}
+                    key={sws.search.id}
+                    searchWithStats={sws}
                     onToggleStatus={handleSearchSetStatus}
                     isUpdating={setSearchStatus.isPending}
                 />

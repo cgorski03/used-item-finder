@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { router, protectedProcedure } from '../init';
-import { eq, search, and, setSearchActive } from '@db'
+import { eq, search, and, setSearchActive, getSearchRunTrends } from '@db'
 
 export const searchRouter = router({
     getSearchById: protectedProcedure
@@ -19,10 +19,27 @@ export const searchRouter = router({
     getUserSearches: protectedProcedure
         .query(async ({ ctx }) => {
             const userId = ctx.userId;
-            const allItems = (await ctx.db).select()
+            const db = await ctx.db;
+            const allItems = await db.select()
                 .from(search)
                 .where(eq(search.userId, userId));
-            return allItems;
+            // Get the search information, where exists
+            const searchIds = allItems.map((s) => s.id);
+            const searchStatistics = await getSearchRunTrends(db, searchIds);
+            const statsMap = new Map<number, typeof searchStatistics>();
+            searchStatistics.forEach(stat => {
+                const key = stat.searchId;
+                if (!statsMap.has(key)) {
+                    statsMap.set(key, [])
+                }
+                statsMap.get(key)!.push(stat);
+            })
+
+            const results = allItems.map((search) => ({
+                search,
+                stats: statsMap.get(search.id),
+            }));
+            return results;
         }),
     createSearch: protectedProcedure
         .input(

@@ -2,20 +2,20 @@
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
-import { SearchList } from "@/trpc/shared"
+import { SearchWithStatsList } from "@/trpc/shared"
 import { Button } from "@/components/ui/button"
 import { MoreVertical, Package, Pause, Play, Square, TrendingUp } from "lucide-react"
 
 interface SearchCardProps {
-    search: SearchList[number]
+    searchWithStats: SearchWithStatsList[number]
     onToggleStatus: (searchId: number, active: boolean) => void;
     isUpdating: boolean;
 }
 
-export function SearchCard({ search, onToggleStatus }: SearchCardProps) {
+export function SearchCard({ searchWithStats, onToggleStatus }: SearchCardProps) {
+    const { search, stats } = searchWithStats;
+    const todaysStats = stats && stats.at(-1);
     const status = search.active ? "active" : "paused";
-    const itemsFound = 0; // TODO
-    const newToday = 0; // TODO
     const source = "eBay"; // TODO
     return (
         <Card>
@@ -64,15 +64,15 @@ export function SearchCard({ search, onToggleStatus }: SearchCardProps) {
                 <div className="grid grid-cols-2 gap-4 rounded-lg border bg-muted/50 p-4">
                     <div className="space-y-1">
                         <p className="text-2xl font-semibold tabular-nums">
-                            {itemsFound}
+                            {todaysStats?.maxItemsFound || "No Data"}
                         </p>
-                        <p className="text-xs text-muted-foreground">Total Items</p>
+                        <p className="text-xs text-muted-foreground">Total Volume</p>
                     </div>
                     <div className="space-y-1">
                         <div className="flex items-center gap-1.5">
                             <TrendingUp className="h-4 w-4 text-green-600 dark:text-green-400" />
                             <p className="text-2xl font-semibold tabular-nums">
-                                {newToday}
+                                {todaysStats?.newItemsInserted || "No Data"}
                             </p>
                         </div>
                         <p className="text-xs text-muted-foreground">New Today</p>
