@@ -6,7 +6,7 @@ export function getItemInformation(db: Database, searchId: number, userId: numbe
     return db
         .select()
         .from(item)
-        .innerJoin(itemAiAnalysis, eq(itemAiAnalysis.searchItemId, item.externalId))
+        .innerJoin(itemAiAnalysis, eq(itemAiAnalysis.itemId, item.id))
         .innerJoin(search, eq(item.searchId, search.id))
         .where(
             and(

@@ -117,7 +117,7 @@ export const saveItemBasicScore = async (db: WorkerDb, newItemAnalysis: itemAiAn
         await db.insert(itemAiAnalysis)
             .values(newItemAnalysis)
             .onConflictDoUpdate({
-                target: [itemAiAnalysis.searchId, itemAiAnalysis.searchItemId],
+                target: [itemAiAnalysis.searchId, itemAiAnalysis.itemId],
                 set: {
                     score: newItemAnalysis.score,
                     attributesScore: newItemAnalysis.attributesScore,
@@ -130,7 +130,7 @@ export const saveItemBasicScore = async (db: WorkerDb, newItemAnalysis: itemAiAn
             });
     }
     catch (error: any) {
-        console.error(`Error analysis for search ${newItemAnalysis.searchId} ${newItemAnalysis.searchItemId} to database`);
+        console.error(`Error analysis for search ${newItemAnalysis.searchId} ${newItemAnalysis.itemId} to database`);
         console.error('Error details:', {
             message: error.message,
             code: error.code,

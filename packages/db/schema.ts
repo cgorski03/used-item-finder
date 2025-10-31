@@ -55,9 +55,9 @@ export type itemInsert = typeof item.$inferInsert;
 
 export const itemAiAnalysis = pgTable('item_ai_analysis', {
     id: serial('id').primaryKey(),
-    searchId: integer('search_id').notNull(),
+    searchId: integer('search_id').notNull().references(() => search.id, { onDelete: 'cascade' }).notNull(),
     // External ID the item analysis belongs to 
-    searchItemId: varchar('search_item_id', { length: 100 }).notNull(),
+    itemId: integer('item_id').notNull().references(() => item.id, { onDelete: 'cascade' }).notNull(),
     // combination, only one the user will see
     score: integer('score').notNull(),
     // score that all items will have 
@@ -70,7 +70,7 @@ export const itemAiAnalysis = pgTable('item_ai_analysis', {
     model: varchar('model', { length: 30 }),
 }, (table) => ({
     analysisUnique: unique('item_analysis_search_unique')
-        .on(table.searchId, table.searchItemId)
+        .on(table.searchId, table.itemId)
 }));
 
 export type itemAiAnalysisSelect = typeof itemAiAnalysis.$inferSelect;

@@ -83,7 +83,7 @@ export async function handleAiAnalysisRequest(batch: MessageBatch<AiAnalysisMess
 
             await saveItemBasicScore(db, {
                 searchId: search.id,
-                searchItemId: item.externalId,
+                itemId: item.id,
                 score: analysis.imageScore || analysis.score,
                 attributesScore: analysis.score,
                 attributesReasoning: analysis.reasoning,
