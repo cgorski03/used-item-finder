@@ -65,17 +65,17 @@ export async function handleSearchRequest(batch: MessageBatch<SearchMessage>, en
 }
 
 export async function handleAiAnalysisRequest(batch: MessageBatch<AiAnalysisMessage>, env: Env, ctx: ExecutionContext) {
-    console.log(`Handling AI Analysis request batch: ${batch.messages}`);
     const itemIds = batch.messages.map((message) => {
         return message.body.item_id
     });
+    console.log(`Handling AI Analysis request batch: ${itemIds}`);
+
     const db = getWorkerDb(env.DATABASE_URL);
-    console.log("Pre: " + itemIds);
     const itemSearchObjects = await getItemSearchObjects(db, itemIds);
     if (itemSearchObjects.length === 0) { throw new Error("No items to analyze"); }
-    try {
-        await Promise.all(itemSearchObjects.map(async (itemSearch) => {
-            const { item, search } = itemSearch;
+
+    await Promise.allSettled(itemSearchObjects.map(async ({ item, search }) => {
+        try {
             if (!item || !search) {
                 throw Error("What the heck");
             }
@@ -86,10 +86,11 @@ export async function handleAiAnalysisRequest(batch: MessageBatch<AiAnalysisMess
                 itemId: item.id,
                 ...analysis
             })
-        }));
+        } catch (error: any) {
 
-    } catch (error: any) {
-        console.error('some analysis failed');
-        throw error;
-    }
+            console.error(`${item.id} analysis failed`);
+            batch.messages.find((ms) => ms.body.item_id === item.id)?.retry();
+            throw error;
+        }
+    }));
 }
