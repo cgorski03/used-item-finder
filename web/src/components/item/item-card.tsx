@@ -23,6 +23,9 @@ export function ItemCard({ item, itemAiAnalysis }: ItemCardProps) {
     if (!item) {
         return <div>Error Loading Item</div>;
     }
+    if (!itemAiAnalysis) {
+        console.log("itme doens't have any analysis");
+    }
 
     const formattedPrice = new Intl.NumberFormat("en-US", {
         style: "currency",

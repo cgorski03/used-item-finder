@@ -6,12 +6,17 @@ export function getItemInformation(db: Database, searchId: number, userId: numbe
     return db
         .select()
         .from(item)
-        .innerJoin(itemAiAnalysis, eq(itemAiAnalysis.itemId, item.id))
+        .leftJoin(
+            itemAiAnalysis,
+            and(
+                eq(itemAiAnalysis.itemId, item.id),
+                eq(itemAiAnalysis.searchId, searchId)
+            )
+        )
         .innerJoin(search, eq(item.searchId, search.id))
         .where(
             and(
                 eq(item.searchId, searchId),
-                eq(itemAiAnalysis.searchId, searchId),
                 eq(search.userId, userId)
             )
         );
