@@ -64,8 +64,10 @@ export const itemAiAnalysis = pgTable('item_ai_analysis', {
     // simple basedo n basic attributes - title price text based etc
     attributesScore: integer('attributes_score').notNull(),
     attributesReasoning: varchar('attributes_reasoning', { length: 600 }).notNull(),
+    attributesTokens: integer('attributes_tokens'),
     imageScore: integer('image_score'),
     imageReasoning: varchar('image_reasoning', { length: 600 }),
+    imageAnalysisTokens: integer('image_analysis_tokens'),
     analyzedAt: timestamp('analyzed_at').defaultNow().notNull(),
     model: varchar('model', { length: 30 }),
 }, (table) => ({

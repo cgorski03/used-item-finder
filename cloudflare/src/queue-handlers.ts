@@ -84,12 +84,7 @@ export async function handleAiAnalysisRequest(batch: MessageBatch<AiAnalysisMess
             await saveItemBasicScore(db, {
                 searchId: search.id,
                 itemId: item.id,
-                score: analysis.imageScore || analysis.score,
-                attributesScore: analysis.score,
-                attributesReasoning: analysis.reasoning,
-                imageReasoning: analysis.imageReasoning,
-                imageScore: analysis.imageScore,
-                model: analysis.model,
+                ...analysis
             })
         }));
 
