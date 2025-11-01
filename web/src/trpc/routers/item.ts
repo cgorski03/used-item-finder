@@ -1,6 +1,24 @@
 import { z } from 'zod';
 import { router, publicProcedure, protectedProcedure } from '../init';
-import { desc, eq, getItemInformation, item, search } from '@db'
+import { desc, eq, getItemCountBySearch, getItemInformation, item, SORT_DIRECTION_FUNC_MAP, SORTABLE_ITEM_COLUMNS_MAP, SortByColumns, SortDirection } from '@db'
+
+const ItemSortBySchema = z.enum(
+    Object.keys(SORTABLE_ITEM_COLUMNS_MAP) as [SortByColumns, ...SortByColumns[]]
+)
+
+const SortOrderSchema = z.enum(
+    Object.keys(SORT_DIRECTION_FUNC_MAP) as [SortDirection, ...SortDirection[]]
+)
+
+const getBySearchIdInput = z.object({
+    searchId: z.number(),
+    limit: z.number().min(0).max(100).default(50).optional(),
+    offset: z.number().min(0).default(0).optional(),
+    orderBy: z.object({
+        column: ItemSortBySchema,
+        direction: SortOrderSchema,
+    }).optional()
+}).required()
 
 export const itemRouter = router({
     getAll: publicProcedure
@@ -16,13 +34,23 @@ export const itemRouter = router({
             return allItems;
         }),
     getBySearchId: protectedProcedure
-        .input(z.object({
-            searchId: z.number()
-        }).required()).query(async ({ ctx, input }) => {
-            const searchId = input?.searchId;
+        .input(getBySearchIdInput).query(async ({ ctx, input }) => {
+            const { searchId, limit, offset, orderBy } = input;
             const userId = ctx.userId;
             const db = await ctx.db;
-            return await getItemInformation(db, searchId, userId);
+
+            const items = await getItemInformation(db, {
+                searchId,
+                userId,
+                limit,
+                offset,
+                orderBy
+            });
+
+            console.log(`ITEMS RETURNED`);
+            const count = await getItemCountBySearch(db, searchId, userId);
+            console.log(`ITEM COUNT RETURN ${count}`);
+            return { items, count: count }
         }),
     getById: publicProcedure
         .input(z.object({

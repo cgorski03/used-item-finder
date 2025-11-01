@@ -1,11 +1,10 @@
-import { getWorkerDb, itemInsert } from "@db";
+import { getWorkerDb } from "@db";
 import { getItemSearchObjects, getSearchObjects, saveItemBasicScore, saveItemsAndUpdateSearch, saveSearchRunFailure, saveSearchRunStub, saveSearchRunSuccess } from "./repository";
 import { analyzeItem } from "./ai/analyze-item";
 import { type AiAnalysisMessage, type SearchMessage } from "./types/queue";
-import { type EbayItemSummary, searchEbay } from "./ebay/api";
+import { searchEbay } from "./ebay/api";
 import { parseAccessTokenHelper } from "./ebay/tokens";
 import { processEbayItemsForDb } from "./lib/ebay-to-db";
-import { MessageConversionError } from "ai";
 
 export async function handleSearchRequest(batch: MessageBatch<SearchMessage>, env: Env, ctx: ExecutionContext) {
     // without access token, no searches will succeed
