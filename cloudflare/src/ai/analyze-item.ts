@@ -86,7 +86,7 @@ export async function analyzeItem(api_key: string, item: itemSelect, search: sea
     }
 
     return {
-        score: imageAnalysisResult?.score || basicAnalysisResult.score,
+        score: imageAnalysisResult?.score ?? basicAnalysisResult.score,
         attributesScore: basicAnalysisResult.score,
         attributesReasoning: basicAnalysisResult.reasoning,
         attributesTokens: basicAnalysisResult.tokens,
