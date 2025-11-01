@@ -1,4 +1,4 @@
-import { getWorkerDb } from "@db";
+import { getWorkerDb, itemInsert } from "@db";
 import { getItemSearchObjects, getSearchObjects, saveItemBasicScore, saveItemsAndUpdateSearch, saveSearchRunFailure, saveSearchRunStub, saveSearchRunSuccess } from "./repository";
 import { analyzeItem } from "./ai/analyze-item";
 import { type AiAnalysisMessage, type SearchMessage } from "./types/queue";
@@ -37,13 +37,18 @@ export async function handleSearchRequest(batch: MessageBatch<SearchMessage>, en
                 searchRun,
                 totalApiItems: apiItemCount,
                 newItemsInserted: newRowsInserted.length,
-            })
+            });
             const newIds = newRowsInserted
                 .map((row) => ({
                     body: { item_id: row.id },
                 }));
             if (newIds.length !== 0) {
-                await env.AI_ANALYSIS_QUEUE.sendBatch(newIds);
+                const BATCH_SIZE = 100;
+
+                for (let i = 0; i < newIds.length; i += BATCH_SIZE) {
+                    const batch = newIds.slice(i, i + BATCH_SIZE);
+                    await env.AI_ANALYSIS_QUEUE.sendBatch(batch);
+                }
             }
         }
         catch (err: any) {

@@ -43,6 +43,11 @@ export const saveItemsAndUpdateSearch = async (
     items: itemInsert[],
     searchId: number
 ): Promise<itemInsert[]> => {
+    const uniqueItems = Array.from(
+        new Map(
+            items.map((item) => [`${item.searchId}-${item.externalId}`, item])
+        ).values()
+    );
     try {
         console.log(`saving ${items.length} items`);
 
@@ -50,7 +55,7 @@ export const saveItemsAndUpdateSearch = async (
             const insertTime = new Date();
 
             // Explicitly set discoveredAt for all items
-            const itemsWithTimestamp = items.map((i) => ({
+            const itemsWithTimestamp = uniqueItems.map((i) => ({
                 ...i,
                 discoveredAt: insertTime,
             }));

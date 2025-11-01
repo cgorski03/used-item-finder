@@ -31,48 +31,77 @@ export const getAccessToken = async (options: EbayAuthTokenOptions): Promise<Acc
     return JSON.parse(await token.getApplicationToken(options.env));
 }
 
-export async function searchEbay(keywords: string, accessToken: string, ebayEnv: EbayEnv):
-    Promise<{ apiItemCount: number, apiItems: EbayItemSummary[] }> {
+export async function searchEbay(
+    keywords: string,
+    accessToken: string,
+    ebayEnv: EbayEnv
+): Promise<{ apiItemCount: number; apiItems: EbayItemSummary[] }> {
     const endpoint = getBaseUrl(ebayEnv);
-    const queryParams: EbaySearchQuery = {
-        q: keywords,
-        limit: "100",
-        offset: "0",
-        fieldgroups: "EXTENDED"
-    };
-    const searchParams = getUrlSearchParams(queryParams);
     const headers = getEbaySearchHeaders(accessToken);
-    try {
-        // Construct the request options
-        const requestOptions = {
-            method: 'GET',
-            headers: headers as Record<string, string>, // Cast for fetch signature compatibility
+    const requestOptions = {
+        method: "GET",
+        headers: headers as Record<string, string>,
+    };
+
+    const limit = 100;
+    let offset = 0;
+    let allItems: EbayItemSummary[] = [];
+    let totalCount = 0;
+    let hasMoreItems = true;
+
+    while (hasMoreItems) {
+        const queryParams: EbaySearchQuery = {
+            q: keywords,
+            limit: limit.toString(),
+            offset: offset.toString(),
+            fieldgroups: "EXTENDED",
         };
+        const searchParams = getUrlSearchParams(queryParams);
 
-        // Print the full request details
-        console.log('Request URL:', `${endpoint}?${searchParams.toString()}`);
-        console.log('Request Options:', requestOptions);
+        console.log("Request URL:", `${endpoint}?${searchParams.toString()}`);
+        console.log("Request Options:", requestOptions);
 
-        // Make the request
-        const response = await fetch(`${endpoint}?${searchParams.toString()}`, requestOptions);
-        if (!response.ok) {
-            // The generated types for 400/500 say 'content?: never',
-            // so we might not get a JSON error body. Read as text for better debugging.
-            const errorText = await response.text();
-            console.error(
-                `eBay Browse API Error (${response.status} ${response.statusText}):`,
-                errorText,
+        try {
+            const response = await fetch(
+                `${endpoint}?${searchParams.toString()}`,
+                requestOptions
             );
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error(
+                    `eBay Browse API Error (${response.status} ${response.statusText}):`,
+                    errorText
+                );
+                break;
+            }
+
+            const data: EbaySearchResponse = await response.json();
+
+            if (!data.itemSummaries || data.itemSummaries.length === 0) {
+                hasMoreItems = false;
+                break;
+            }
+
+            totalCount = data.total || 0;
+            allItems.push(...data.itemSummaries);
+
+            // Check if we've retrieved all items
+            if (offset + limit >= totalCount) {
+                hasMoreItems = false;
+            } else {
+                offset += limit;
+            }
+        } catch (error: any) {
+            console.error(`error(ebay-api.searchEbay): ${error}`);
+            throw error;
         }
-        const data: EbaySearchResponse = await response.json();
-        return {
-            apiItemCount: data.total || 0,
-            apiItems: data.itemSummaries || []
-        };
-    } catch (error: any) {
-        console.error(`error(ebay-api.searchEbay): ${error}`);
-        throw (error);
     }
+
+    return {
+        apiItemCount: totalCount,
+        apiItems: allItems,
+    };
 }
 
 export const hasRequiredFieldsForDb = (ebayItem: EbayItemSummary): boolean => (

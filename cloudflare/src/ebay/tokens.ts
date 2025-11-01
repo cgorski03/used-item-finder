@@ -33,21 +33,17 @@ export async function setEbayToken(item_finder_kv: KVNamespace, EBAY_TOKEN_KEY: 
     // Get the current token from the KV 
     let accessToken = await item_finder_kv.get(EBAY_TOKEN_KEY, { type: 'json' });
     if (!shouldGetNewTokenHelper(accessToken)) {
-        console.log(`Token within ${EXPIRATION_BUFFER_MINUTES} minutes. Refreshing token is not necessary`);
         return;
     }
     // Get another token
     try {
         const newToken = await getAccessToken(ebayCredentials)
-        console.log(newToken);
         const kvObj: AccessTokenKVObject = {
             access_token: newToken.access_token,
             expires_at: Date.now() + newToken.expires_in * 1000
         }
-        console.log(kvObj);
         // Save new token
         await item_finder_kv.put(EBAY_TOKEN_KEY, JSON.stringify(kvObj))
-        console.log(await item_finder_kv.get(EBAY_TOKEN_KEY));
     } catch (error: any) {
         console.error(`Failed to get new token from ebay API. Error: ${error}`)
         // rethrow error for observability

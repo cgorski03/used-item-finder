@@ -7,7 +7,6 @@ export default function SearchesGrid() {
     const { data: searchesWithStats, isLoading, isError, error } =
         trpc.search.getUserSearches.useQuery();
     const utils = trpc.useUtils();
-
     // Define the mutation hook at the top level
     const setSearchStatus = trpc.search.setSearchActive.useMutation({
         onSuccess: () => {
