@@ -1,4 +1,3 @@
-import { off } from 'node:process';
 import type { Database } from '../node-db'
 import { item, itemAiAnalysis, search } from '../schema';
 import { eq, and, asc, desc, count } from 'drizzle-orm';

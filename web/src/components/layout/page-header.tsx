@@ -21,7 +21,6 @@ export function PageHeader({
     return (
         <div className="space-y-4">
             <AppBreadcrumb customSegments={breadcrumbs} />
-            <h1 className="text-3xl font-bold">{title}</h1>
         </div>
     );
 }

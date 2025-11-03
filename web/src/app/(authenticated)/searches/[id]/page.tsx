@@ -1,8 +1,10 @@
 "use client"
 import { ItemCard } from "@/components/item/item-card";
 import { PageHeader } from "@/components/layout/page-header";
+import { useItemSort } from "@/lib/useItemSort";
 import { trpc } from "@/trpc/react"
 import { use } from "react";
+import { ItemSortControls } from "./item-sort-controls";
 
 const parseSearchId = (id: string) => {
     const parsedId = Number(id);
@@ -14,7 +16,8 @@ const parseSearchId = (id: string) => {
 }
 export default function SearchItemsPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
-    console.log(id);
+    const { sortByColumn, updateSort, sortDirectionColumn, updateOffset } = useItemSort()
+
     const searchId = parseSearchId(id);
     if (searchId === -1) {
         return (
@@ -24,7 +27,16 @@ export default function SearchItemsPage({ params }: { params: Promise<{ id: stri
         )
     }
     const { data: search, isLoading: searchLoading, isError: searchIsError, error: searchError } = trpc.search.getSearchById.useQuery({ id: searchId });
-    const { data: itemData, isLoading, isError, error } = trpc.item.getBySearchId.useQuery({ searchId: searchId, limit: 100, offset: 0, orderBy: { column: 'score', direction: 'desc' } })
+    const { data: itemData, isLoading, isError, error } = trpc.item.getBySearchId.useQuery({
+        searchId,
+        limit: 25,
+        offset: 0,
+        orderBy: {
+            column: sortByColumn,
+            direction: sortDirectionColumn
+        }
+    })
+
     return (
         <div className="w-full ">
             <PageHeader
@@ -37,6 +49,11 @@ export default function SearchItemsPage({ params }: { params: Promise<{ id: stri
                 ]}
             />
             <div className="p-4" >
+                <ItemSortControls
+                    sortColumn={sortByColumn}
+                    sortDirection={sortDirectionColumn}
+                    onUpdateSort={updateSort}
+                />
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 xxl:grid-cols-6">
                     {itemData?.items && itemData.items.map((itemDto) => {
                         const { item, itemAiAnalysis } = itemDto;
