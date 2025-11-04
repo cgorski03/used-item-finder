@@ -16,7 +16,13 @@ const parseSearchId = (id: string) => {
 }
 export default function SearchItemsPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
-    const { sortByColumn, updateSort, sortDirectionColumn, updateOffset } = useItemSort()
+    const { sortByColumn,
+        updateSort,
+        sortDirectionColumn,
+        updateOffset,
+        filters,
+        updateFilters
+    } = useItemSort()
 
     const searchId = parseSearchId(id);
     if (searchId === -1) {
@@ -34,11 +40,12 @@ export default function SearchItemsPage({ params }: { params: Promise<{ id: stri
         orderBy: {
             column: sortByColumn,
             direction: sortDirectionColumn
-        }
+        },
+        filterBy: filters
     })
 
     return (
-        <div className="w-full ">
+        <div className="w-full " >
             <PageHeader
                 title={search?.title ?? "Loading"}
                 description="Items found matching your search criteria"
@@ -53,6 +60,8 @@ export default function SearchItemsPage({ params }: { params: Promise<{ id: stri
                     sortColumn={sortByColumn}
                     sortDirection={sortDirectionColumn}
                     onUpdateSort={updateSort}
+                    onUpdateFilters={updateFilters}
+                    filters={filters}
                 />
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 xxl:grid-cols-6">
                     {itemData?.items && itemData.items.map((itemDto) => {
@@ -63,6 +72,6 @@ export default function SearchItemsPage({ params }: { params: Promise<{ id: stri
                     )}
                 </div>
             </div>
-        </div>
+        </div >
     );
 }

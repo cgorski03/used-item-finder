@@ -1,20 +1,36 @@
 import { useRouter, useSearchParams } from "next/navigation";
-import { SortByColumns, SortDirection } from "@db";
+import { SortFilterByColumns, SortDirection } from "@db";
 import { useCallback } from "react";
+import { FilterType } from "@/trpc/routers/item";
 
 export function useItemSort() {
     const router = useRouter();
     const searchParams = useSearchParams();
 
-    const sortByColumn = (searchParams.get('sortBy') || 'score') as SortByColumns;
+    const sortByColumn = (searchParams.get('sortBy') || 'score') as SortFilterByColumns;
     const sortDirectionColumn = (searchParams.get('sortDir') || 'desc') as SortDirection;
     const offset = searchParams.get('offset') || '0';
 
+    const filters: FilterType[] = searchParams.get('filterBy')
+        ? JSON.parse(decodeURIComponent(searchParams.get('filterBy')!))
+        : [];
+    console.log(filters);
+
     const updateSort = useCallback(
-        (column: SortByColumns, direction: SortDirection) => {
+        (column: SortFilterByColumns, direction: SortDirection) => {
             const params = new URLSearchParams(searchParams);
             params.set('sortBy', column);
             params.set('sortDir', direction);
+            params.set('offset', '0');
+            router.push(`?${params.toString()}`);
+        },
+        [searchParams, router]
+    )
+
+    const updateFilters = useCallback(
+        (newFilters: FilterType[]) => {
+            const params = new URLSearchParams(searchParams);
+            params.set('filterBy', encodeURIComponent(JSON.stringify(newFilters)));
             params.set('offset', '0');
             router.push(`?${params.toString()}`);
         },
@@ -33,6 +49,8 @@ export function useItemSort() {
         sortByColumn,
         sortDirectionColumn,
         offset,
+        filters,
+        updateFilters,
         updateSort,
         updateOffset
     }

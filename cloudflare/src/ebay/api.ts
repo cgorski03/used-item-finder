@@ -58,9 +58,6 @@ export async function searchEbay(
         };
         const searchParams = getUrlSearchParams(queryParams);
 
-        console.log("Request URL:", `${endpoint}?${searchParams.toString()}`);
-        console.log("Request Options:", requestOptions);
-
         try {
             const response = await fetch(
                 `${endpoint}?${searchParams.toString()}`,

@@ -1,14 +1,36 @@
 import { z } from 'zod';
 import { router, publicProcedure, protectedProcedure } from '../init';
-import { desc, eq, getItemCountBySearch, getItemInformation, item, SORT_DIRECTION_FUNC_MAP, SORTABLE_ITEM_COLUMNS_MAP, SortByColumns, SortDirection } from '@db'
+import { desc, getItemCountBySearch, getItemInformation, item, SORT_DIRECTION_FUNC_MAP, ITEM_COLUMNS_MAP, SortFilterByColumns, SortDirection, FILTER_OPERATOR_FUNC_MAP } from '@db'
 
 const ItemSortBySchema = z.enum(
-    Object.keys(SORTABLE_ITEM_COLUMNS_MAP) as [SortByColumns, ...SortByColumns[]]
+    Object.keys(ITEM_COLUMNS_MAP) as [SortFilterByColumns, ...SortFilterByColumns[]]
 )
 
 const SortOrderSchema = z.enum(
     Object.keys(SORT_DIRECTION_FUNC_MAP) as [SortDirection, ...SortDirection[]]
 )
+const FilterOperatorSchema = z.enum(
+    Object.keys(FILTER_OPERATOR_FUNC_MAP) as [keyof typeof FILTER_OPERATOR_FUNC_MAP, ...Array<keyof typeof FILTER_OPERATOR_FUNC_MAP>]
+);
+
+const ColumnFilterSchema = z.discriminatedUnion('column', [
+    z.object({
+        column: z.literal('priceValue'),
+        operator: FilterOperatorSchema,
+        value: z.number(),
+    }),
+    z.object({
+        column: z.literal('discoveredAt'),
+        operator: FilterOperatorSchema,
+        value: z.coerce.date(),
+    }),
+    z.object({
+        column: z.literal('score'),
+        operator: FilterOperatorSchema,
+        value: z.number(),
+    }),
+]);
+export type FilterType = z.infer<typeof ColumnFilterSchema>;
 
 const getBySearchIdInput = z.object({
     searchId: z.number(),
@@ -17,7 +39,8 @@ const getBySearchIdInput = z.object({
     orderBy: z.object({
         column: ItemSortBySchema,
         direction: SortOrderSchema,
-    }).optional()
+    }).optional(),
+    filterBy: z.array(ColumnFilterSchema).optional(),
 }).required()
 
 export const itemRouter = router({
@@ -35,7 +58,8 @@ export const itemRouter = router({
         }),
     getBySearchId: protectedProcedure
         .input(getBySearchIdInput).query(async ({ ctx, input }) => {
-            const { searchId, limit, offset, orderBy } = input;
+            console.log(input);
+            const { searchId, limit, offset, orderBy, filterBy } = input;
             const userId = ctx.userId;
             const db = await ctx.db;
 
@@ -44,7 +68,8 @@ export const itemRouter = router({
                 userId,
                 limit,
                 offset,
-                orderBy
+                orderBy,
+                filterBy,
             });
 
             console.log(`ITEMS RETURNED`);

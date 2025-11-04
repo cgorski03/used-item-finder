@@ -1,13 +1,30 @@
 import type { Database } from '../node-db'
 import { item, itemAiAnalysis, search } from '../schema';
-import { eq, and, asc, desc, count } from 'drizzle-orm';
+import { eq, and, asc, desc, count, gt, lt } from 'drizzle-orm';
 
-export const SORTABLE_ITEM_COLUMNS_MAP = {
+export const ITEM_COLUMNS_MAP = {
     priceValue: item.priceValue,
-    itemCreationDate: item.itemCreationDate,
+    discoveredAt: item.discoveredAt,
     score: itemAiAnalysis.score,
 }
-export type SortByColumns = keyof typeof SORTABLE_ITEM_COLUMNS_MAP;
+type ITEM_COLUMNS_VALUE_MAP = {
+    priceValue: number;
+    discoveredAt: Date;
+    score: number;
+}
+
+export type SortFilterByColumns = keyof typeof ITEM_COLUMNS_MAP;
+
+export const FILTER_OPERATOR_FUNC_MAP = {
+    'gt': gt,
+    'lt': lt,
+} as const
+
+export type ColumnFilter<T extends SortFilterByColumns = SortFilterByColumns> = {
+    column: T;
+    operator: keyof typeof FILTER_OPERATOR_FUNC_MAP;
+    value: ITEM_COLUMNS_VALUE_MAP[T];
+}
 
 export const SORT_DIRECTION_FUNC_MAP = {
     'asc': asc,
@@ -21,14 +38,20 @@ type getItemsBySearchIdInput = {
     limit: number;
     offset: number;
     orderBy?: {
-        column: SortByColumns;
+        column: SortFilterByColumns;
         direction: SortDirection;
     }
+    filterBy?: ColumnFilter[];
 }
 
 export async function getItemInformation(db: Database, input: getItemsBySearchIdInput) {
-    const { searchId, userId, limit, offset, orderBy } = input;
     console.log(input);
+    const { searchId, userId, limit, offset, orderBy, filterBy } = input;
+    const filterConditions = filterBy?.map((filter) =>
+        FILTER_OPERATOR_FUNC_MAP[filter.operator](
+            ITEM_COLUMNS_MAP[filter.column],
+            filter.value)
+    ) ?? []
     const query = db
         .select({ item: item, itemAiAnalysis })
         .from(item)
@@ -43,11 +66,13 @@ export async function getItemInformation(db: Database, input: getItemsBySearchId
         .where(
             and(
                 eq(item.searchId, searchId),
-                eq(search.userId, userId)
+                eq(search.userId, userId),
+                ...filterConditions
             )
         );
+
     if (orderBy) {
-        query.orderBy(SORT_DIRECTION_FUNC_MAP[orderBy.direction](SORTABLE_ITEM_COLUMNS_MAP[orderBy.column]));
+        query.orderBy(SORT_DIRECTION_FUNC_MAP[orderBy.direction](ITEM_COLUMNS_MAP[orderBy.column]));
     }
     query.limit(limit).offset(offset);
     console.log(query.toSQL());
@@ -69,3 +94,4 @@ export async function getItemCountBySearch(
 
     return countObj[0];
 }
+
